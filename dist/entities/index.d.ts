@@ -1,0 +1,12 @@
+export { UserRole } from './user-role.entity';
+export { User } from './user.entity';
+export { UserAddress } from './user-address.entity';
+export { Restaurant, WorkingHours } from './restaurant.entity';
+export { Table } from './table.entity';
+export { MenuCategory } from './menu-category.entity';
+export { MenuItem } from './menu-item.entity';
+export { Order, OrderType } from './order.entity';
+export { OrderItem } from './order-item.entity';
+export { TableReservation, ReservationStatus } from './table-reservation.entity';
+export { RestaurantReview } from './restaurant-review.entity';
+export { AuditLog, AuditOperation } from './audit-log.entity';
