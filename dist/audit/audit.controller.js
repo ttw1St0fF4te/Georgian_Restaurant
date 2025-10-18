@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuditController = void 0;
 const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
 const audit_service_1 = require("./audit.service");
 const audit_log_entity_1 = require("../entities/audit-log.entity");
 let AuditController = class AuditController {
@@ -56,6 +57,16 @@ let AuditController = class AuditController {
 exports.AuditController = AuditController;
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Получить записи аудита с фильтрацией',
+        description: 'Возвращает записи аудита с возможностью фильтрации по таблице, операции, пользователю и ID записи'
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'table', required: false, description: 'Имя таблицы для фильтрации' }),
+    (0, swagger_1.ApiQuery)({ name: 'operation', required: false, enum: audit_log_entity_1.AuditOperation, description: 'Тип операции (INSERT, UPDATE, DELETE)' }),
+    (0, swagger_1.ApiQuery)({ name: 'user', required: false, description: 'Пользователь, выполнивший операцию' }),
+    (0, swagger_1.ApiQuery)({ name: 'recordId', required: false, description: 'ID измененной записи' }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Лимит записей (по умолчанию 50)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Записи аудита успешно получены' }),
     __param(0, (0, common_1.Query)('table')),
     __param(1, (0, common_1.Query)('operation')),
     __param(2, (0, common_1.Query)('user')),
@@ -67,6 +78,12 @@ __decorate([
 ], AuditController.prototype, "getAuditLogs", null);
 __decorate([
     (0, common_1.Get)('recent'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Получить последние записи аудита',
+        description: 'Возвращает последние записи аудита в порядке убывания по времени'
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number, description: 'Количество записей (по умолчанию 50)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Последние записи аудита получены' }),
     __param(0, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(50), common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -82,6 +99,21 @@ __decorate([
 ], AuditController.prototype, "getRecordHistory", null);
 __decorate([
     (0, common_1.Get)('statistics'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Получить статистику аудита',
+        description: 'Возвращает статистику операций аудита по таблицам и типам операций'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Статистика аудита получена',
+        schema: {
+            type: 'object',
+            properties: {
+                operationStats: { type: 'array', description: 'Статистика по операциям' },
+                tableStats: { type: 'array', description: 'Статистика по таблицам' }
+            }
+        }
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -102,6 +134,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuditController.prototype, "getUserActivity", null);
 exports.AuditController = AuditController = __decorate([
+    (0, swagger_1.ApiTags)('audit'),
     (0, common_1.Controller)('audit'),
     __metadata("design:paramtypes", [audit_service_1.AuditService])
 ], AuditController);

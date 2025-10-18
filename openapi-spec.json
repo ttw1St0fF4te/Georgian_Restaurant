@@ -1,0 +1,2074 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Возвращает базовую информацию о Georgian Restaurant API",
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Информация о приложении успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Hello Georgian Restaurant API!"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "PostgreSQL gr_db2"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить информацию о приложении",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Возвращает статус работоспособности Georgian Restaurant API",
+        "operationId": "HealthController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API работает нормально",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "Georgian Restaurant API"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Проверка работоспособности API",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/db": {
+      "get": {
+        "description": "Проверяет состояние подключения к PostgreSQL базе данных",
+        "operationId": "HealthController_getDatabaseHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "База данных доступна",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "gr_db2"
+                    },
+                    "connected": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Проверка подключения к базе данных",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/db/info": {
+      "get": {
+        "description": "Возвращает версию PostgreSQL, имя БД и пользователя",
+        "operationId": "HealthController_getDatabaseInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Информация о базе данных получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "example": "PostgreSQL 14.9"
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "gr_db2"
+                    },
+                    "user": {
+                      "type": "string",
+                      "example": "restaurant_admin"
+                    },
+                    "connection_status": {
+                      "type": "string",
+                      "example": "active"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить подробную информацию о базе данных",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/audit": {
+      "get": {
+        "description": "Возвращает записи аудита с возможностью фильтрации по таблице, операции, пользователю и ID записи",
+        "operationId": "AuditController_getAuditLogs",
+        "parameters": [
+          {
+            "name": "table",
+            "required": false,
+            "in": "query",
+            "description": "Имя таблицы для фильтрации",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "required": false,
+            "in": "query",
+            "description": "Тип операции (INSERT, UPDATE, DELETE)",
+            "schema": {
+              "enum": [
+                "INSERT",
+                "UPDATE",
+                "DELETE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "user",
+            "required": false,
+            "in": "query",
+            "description": "Пользователь, выполнивший операцию",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "required": false,
+            "in": "query",
+            "description": "ID измененной записи",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Лимит записей (по умолчанию 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Записи аудита успешно получены"
+          }
+        },
+        "summary": "Получить записи аудита с фильтрацией",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/audit/recent": {
+      "get": {
+        "description": "Возвращает последние записи аудита в порядке убывания по времени",
+        "operationId": "AuditController_getRecentAuditLogs",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Количество записей (по умолчанию 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Последние записи аудита получены"
+          }
+        },
+        "summary": "Получить последние записи аудита",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/audit/history": {
+      "get": {
+        "operationId": "AuditController_getRecordHistory",
+        "parameters": [
+          {
+            "name": "table",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/audit/statistics": {
+      "get": {
+        "description": "Возвращает статистику операций аудита по таблицам и типам операций",
+        "operationId": "AuditController_getStatistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Статистика аудита получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "operationStats": {
+                      "type": "array",
+                      "description": "Статистика по операциям"
+                    },
+                    "tableStats": {
+                      "type": "array",
+                      "description": "Статистика по таблицам"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить статистику аудита",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/audit/recent-changes": {
+      "get": {
+        "operationId": "AuditController_getRecentChanges",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/audit/user-activity": {
+      "get": {
+        "operationId": "AuditController_getUserActivity",
+        "parameters": [
+          {
+            "name": "username",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "audit"
+        ]
+      }
+    },
+    "/menu-categories": {
+      "get": {
+        "description": "Возвращает список всех категорий меню, отсортированных по названию",
+        "operationId": "MenuCategoriesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список категорий успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MenuCategoryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить все категории меню",
+        "tags": [
+          "Menu Categories"
+        ]
+      },
+      "post": {
+        "description": "Создает новую категорию меню",
+        "operationId": "MenuCategoriesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMenuCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Категория успешно создана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuCategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для создания категории"
+          }
+        },
+        "summary": "Создать новую категорию",
+        "tags": [
+          "Menu Categories"
+        ]
+      }
+    },
+    "/menu-categories/{id}": {
+      "get": {
+        "description": "Возвращает детальную информацию о категории меню",
+        "operationId": "MenuCategoriesController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Категория найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuCategoryResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Категория с указанным ID не найдена"
+          }
+        },
+        "summary": "Получить категорию по ID",
+        "tags": [
+          "Menu Categories"
+        ]
+      },
+      "patch": {
+        "description": "Обновляет информацию о категории меню",
+        "operationId": "MenuCategoriesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMenuCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Категория успешно обновлена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuCategoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для обновления категории"
+          },
+          "404": {
+            "description": "Категория с указанным ID не найдена"
+          }
+        },
+        "summary": "Обновить категорию",
+        "tags": [
+          "Menu Categories"
+        ]
+      },
+      "delete": {
+        "description": "Удаляет категорию меню",
+        "operationId": "MenuCategoriesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Категория успешно удалена"
+          },
+          "404": {
+            "description": "Категория с указанным ID не найдена"
+          }
+        },
+        "summary": "Удалить категорию",
+        "tags": [
+          "Menu Categories"
+        ]
+      }
+    },
+    "/menu": {
+      "get": {
+        "description": "Возвращает список блюд меню с поддержкой:\n    - Поиска по названию\n    - Фильтрации по категории, типу блюда, цене, времени приготовления, калориям\n    - Сортировки по различным полям\n    - Пагинации\n    Показываются только неудаленные блюда (is_deleted = false)",
+        "operationId": "MenuController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию блюда",
+            "schema": {
+              "example": "хачапури",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_vegetarian",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только вегетарианских блюд",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_spicy",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только острых блюд",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "min_price",
+            "required": false,
+            "in": "query",
+            "description": "Минимальная цена",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_price",
+            "required": false,
+            "in": "query",
+            "description": "Максимальная цена",
+            "schema": {
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_cooking_time",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное время приготовления",
+            "schema": {
+              "example": 30,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_calories",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное количество калорий",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "description": "Поле для сортировки",
+            "schema": {
+              "example": "price",
+              "type": "string",
+              "enum": [
+                "price",
+                "cooking_time_minutes",
+                "calories",
+                "item_name",
+                "created_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "description": "Порядок сортировки",
+            "schema": {
+              "example": "ASC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер страницы (для пагинации)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Количество элементов на странице",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список блюд успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuPaginationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить меню с фильтрацией и поиском",
+        "tags": [
+          "Menu"
+        ]
+      },
+      "post": {
+        "description": "Создает новое блюдо в меню",
+        "operationId": "MenuController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMenuItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Блюдо успешно создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для создания блюда или категория не найдена"
+          }
+        },
+        "summary": "Создать новое блюдо",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
+    "/menu/category/{categoryId}": {
+      "get": {
+        "description": "Возвращает список блюд определенной категории с поддержкой фильтрации",
+        "operationId": "MenuController_findByCategory",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "description": "ID категории меню",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию блюда",
+            "schema": {
+              "example": "хачапури",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_vegetarian",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только вегетарианских блюд",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_spicy",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только острых блюд",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "min_price",
+            "required": false,
+            "in": "query",
+            "description": "Минимальная цена",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_price",
+            "required": false,
+            "in": "query",
+            "description": "Максимальная цена",
+            "schema": {
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_cooking_time",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное время приготовления",
+            "schema": {
+              "example": 30,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_calories",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное количество калорий",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "description": "Поле для сортировки",
+            "schema": {
+              "example": "price",
+              "type": "string",
+              "enum": [
+                "price",
+                "cooking_time_minutes",
+                "calories",
+                "item_name",
+                "created_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "description": "Порядок сортировки",
+            "schema": {
+              "example": "ASC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер страницы (для пагинации)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Количество элементов на странице",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Блюда категории успешно получены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuPaginationResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Категория с указанным ID не найдена"
+          }
+        },
+        "summary": "Получить блюда по категории",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
+    "/menu/{id}": {
+      "get": {
+        "description": "Возвращает детальную информацию о блюде с информацией о категории",
+        "operationId": "MenuController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор блюда",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Блюдо найдено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Блюдо с указанным ID не найдено"
+          }
+        },
+        "summary": "Получить блюдо по ID",
+        "tags": [
+          "Menu"
+        ]
+      },
+      "patch": {
+        "description": "Обновляет информацию о блюде",
+        "operationId": "MenuController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор блюда",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMenuItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Блюдо успешно обновлено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для обновления блюда"
+          },
+          "404": {
+            "description": "Блюдо с указанным ID не найдено"
+          }
+        },
+        "summary": "Обновить блюдо",
+        "tags": [
+          "Menu"
+        ]
+      },
+      "delete": {
+        "description": "Полностью удаляет блюдо из базы данных",
+        "operationId": "MenuController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор блюда",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Блюдо успешно удалено"
+          },
+          "404": {
+            "description": "Блюдо с указанным ID не найдено"
+          }
+        },
+        "summary": "Удалить блюдо",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
+    "/menu/{id}/soft-delete": {
+      "patch": {
+        "description": "Помечает блюдо как удаленное (is_deleted = true), но не удаляет из БД",
+        "operationId": "MenuController_softDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор блюда",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Блюдо успешно помечено как удаленное",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Блюдо с указанным ID не найдено"
+          }
+        },
+        "summary": "Мягкое удаление блюда",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
+    "/menu/{id}/restore": {
+      "patch": {
+        "description": "Восстанавливает мягко удаленное блюдо (is_deleted = false)",
+        "operationId": "MenuController_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор блюда",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Блюдо успешно восстановлено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Блюдо с указанным ID не найдено"
+          }
+        },
+        "summary": "Восстановить удаленное блюдо",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
+    "/restaurants": {
+      "get": {
+        "description": "Возвращает список ресторанов с поддержкой фильтрации:\n    - Поиск по названию\n    - Фильтр по городу и стране\n    - Фильтр по активности (по умолчанию только активные)\n    - Фильтр по минимальному рейтингу\n    Результаты отсортированы по рейтингу (лучшие сначала)",
+        "operationId": "RestaurantsController_findAll",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию ресторана",
+            "schema": {
+              "example": "тбилиси",
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по городу",
+            "schema": {
+              "example": "Тбилиси",
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по стране",
+            "schema": {
+              "example": "Грузия",
+              "type": "string"
+            }
+          },
+          {
+            "name": "is_active",
+            "required": false,
+            "in": "query",
+            "description": "Показывать только активные рестораны",
+            "schema": {
+              "default": true,
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "min_rating",
+            "required": false,
+            "in": "query",
+            "description": "Минимальный рейтинг",
+            "schema": {
+              "minimum": 0,
+              "maximum": 5,
+              "example": 4,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список ресторанов успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RestaurantResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Получить список ресторанов",
+        "tags": [
+          "Restaurants"
+        ]
+      },
+      "post": {
+        "description": "Создает новый ресторан в системе",
+        "operationId": "RestaurantsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRestaurantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ресторан успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для создания ресторана"
+          }
+        },
+        "summary": "Создать новый ресторан",
+        "tags": [
+          "Restaurants"
+        ]
+      }
+    },
+    "/restaurants/{id}": {
+      "get": {
+        "description": "Возвращает детальную информацию о ресторане включая:\n    - Основную информацию\n    - Статистику (количество столиков, вместимость, отзывы, средний рейтинг)",
+        "operationId": "RestaurantsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ресторан найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantDetailResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Получить ресторан по ID",
+        "tags": [
+          "Restaurants"
+        ]
+      },
+      "patch": {
+        "description": "Обновляет информацию о ресторане",
+        "operationId": "RestaurantsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRestaurantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ресторан успешно обновлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные для обновления ресторана"
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Обновить ресторан",
+        "tags": [
+          "Restaurants"
+        ]
+      },
+      "delete": {
+        "description": "Полностью удаляет ресторан из системы",
+        "operationId": "RestaurantsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ресторан успешно удален"
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Удалить ресторан",
+        "tags": [
+          "Restaurants"
+        ]
+      }
+    },
+    "/restaurants/{id}/deactivate": {
+      "patch": {
+        "description": "Помечает ресторан как неактивный (is_active = false)",
+        "operationId": "RestaurantsController_deactivate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ресторан успешно деактивирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Деактивировать ресторан",
+        "tags": [
+          "Restaurants"
+        ]
+      }
+    },
+    "/restaurants/{id}/activate": {
+      "patch": {
+        "description": "Помечает ресторан как активный (is_active = true)",
+        "operationId": "RestaurantsController_activate",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ресторан успешно активирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Активировать ресторан",
+        "tags": [
+          "Restaurants"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Georgian Restaurant API",
+    "description": "API для управления грузинскими ресторанами с системой бронирования, заказов и аудита",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Аутентификация и авторизация"
+    },
+    {
+      "name": "users",
+      "description": "Управление пользователями"
+    },
+    {
+      "name": "restaurants",
+      "description": "Управление ресторанами"
+    },
+    {
+      "name": "menu",
+      "description": "Управление меню"
+    },
+    {
+      "name": "tables",
+      "description": "Управление столиками"
+    },
+    {
+      "name": "reservations",
+      "description": "Бронирование столиков"
+    },
+    {
+      "name": "orders",
+      "description": "Заказы"
+    },
+    {
+      "name": "audit",
+      "description": "Аудит и логирование"
+    },
+    {
+      "name": "health",
+      "description": "Мониторинг состояния системы"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "MenuCategoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "number",
+            "description": "Уникальный идентификатор категории",
+            "example": 1
+          },
+          "category_name": {
+            "type": "string",
+            "description": "Название категории меню",
+            "example": "Горячие блюда",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "category_description": {
+            "type": "string",
+            "description": "Описание категории",
+            "example": "Основные блюда грузинской кухни"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания категории",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2024-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "category_id",
+          "category_name",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateMenuCategoryDto": {
+        "type": "object",
+        "properties": {
+          "category_name": {
+            "type": "string",
+            "description": "Название категории меню",
+            "example": "Горячие блюда",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "category_description": {
+            "type": "string",
+            "description": "Описание категории",
+            "example": "Основные блюда грузинской кухни"
+          }
+        },
+        "required": [
+          "category_name"
+        ]
+      },
+      "UpdateMenuCategoryDto": {
+        "type": "object",
+        "properties": {
+          "category_name": {
+            "type": "string",
+            "description": "Название категории меню",
+            "example": "Горячие блюда",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "category_description": {
+            "type": "string",
+            "description": "Описание категории",
+            "example": "Основные блюда грузинской кухни"
+          }
+        }
+      },
+      "MenuItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "number",
+            "description": "Уникальный идентификатор блюда",
+            "example": 1
+          },
+          "item_name": {
+            "type": "string",
+            "description": "Название блюда",
+            "example": "Хачапури по-аджарски",
+            "minLength": 3,
+            "maxLength": 150
+          },
+          "item_description": {
+            "type": "string",
+            "description": "Описание блюда",
+            "example": "Традиционная грузинская лепешка с сыром и яйцом"
+          },
+          "category_id": {
+            "type": "number",
+            "description": "ID категории меню",
+            "example": 1
+          },
+          "price": {
+            "type": "number",
+            "description": "Стоимость блюда",
+            "example": 25.5
+          },
+          "cooking_time_minutes": {
+            "type": "number",
+            "description": "Время приготовления в минутах",
+            "example": 15
+          },
+          "calories": {
+            "type": "number",
+            "description": "Калории",
+            "example": 350
+          },
+          "is_vegetarian": {
+            "type": "boolean",
+            "description": "Вегетарианское блюдо",
+            "example": false
+          },
+          "is_spicy": {
+            "type": "boolean",
+            "description": "Острое блюдо",
+            "example": false
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "description": "Удалено (мягкое удаление)",
+            "example": false
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL изображения блюда",
+            "example": "https://example.com/image.jpg"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "category": {
+            "type": "object",
+            "description": "Информация о категории"
+          }
+        },
+        "required": [
+          "item_id",
+          "item_name",
+          "category_id",
+          "price",
+          "cooking_time_minutes",
+          "is_vegetarian",
+          "is_spicy",
+          "is_deleted",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "MenuPaginationResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Список блюд",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MenuItemResponseDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Общее количество блюд",
+            "example": 45
+          },
+          "page": {
+            "type": "number",
+            "description": "Текущая страница",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "description": "Количество элементов на странице",
+            "example": 20
+          },
+          "pages": {
+            "type": "number",
+            "description": "Общее количество страниц",
+            "example": 3
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit",
+          "pages"
+        ]
+      },
+      "CreateMenuItemDto": {
+        "type": "object",
+        "properties": {
+          "item_name": {
+            "type": "string",
+            "description": "Название блюда",
+            "example": "Хачапури по-аджарски",
+            "minLength": 3,
+            "maxLength": 150
+          },
+          "item_description": {
+            "type": "string",
+            "description": "Описание блюда",
+            "example": "Традиционная грузинская лепешка с сыром и яйцом"
+          },
+          "category_id": {
+            "type": "number",
+            "description": "ID категории меню",
+            "example": 1
+          },
+          "price": {
+            "type": "number",
+            "description": "Стоимость блюда",
+            "example": 25.5
+          },
+          "cooking_time_minutes": {
+            "type": "number",
+            "description": "Время приготовления в минутах",
+            "example": 15,
+            "default": 0
+          },
+          "calories": {
+            "type": "number",
+            "description": "Калории",
+            "example": 350
+          },
+          "is_vegetarian": {
+            "type": "boolean",
+            "description": "Вегетарианское блюдо",
+            "example": false,
+            "default": false
+          },
+          "is_spicy": {
+            "type": "boolean",
+            "description": "Острое блюдо",
+            "example": false,
+            "default": false
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL изображения блюда",
+            "example": "https://example.com/image.jpg"
+          }
+        },
+        "required": [
+          "item_name",
+          "category_id",
+          "price"
+        ]
+      },
+      "UpdateMenuItemDto": {
+        "type": "object",
+        "properties": {
+          "item_name": {
+            "type": "string",
+            "description": "Название блюда",
+            "example": "Хачапури по-аджарски",
+            "minLength": 3,
+            "maxLength": 150
+          },
+          "item_description": {
+            "type": "string",
+            "description": "Описание блюда",
+            "example": "Традиционная грузинская лепешка с сыром и яйцом"
+          },
+          "category_id": {
+            "type": "number",
+            "description": "ID категории меню",
+            "example": 1
+          },
+          "price": {
+            "type": "number",
+            "description": "Стоимость блюда",
+            "example": 25.5
+          },
+          "cooking_time_minutes": {
+            "type": "number",
+            "description": "Время приготовления в минутах",
+            "example": 15
+          },
+          "calories": {
+            "type": "number",
+            "description": "Калории",
+            "example": 350
+          },
+          "is_vegetarian": {
+            "type": "boolean",
+            "description": "Вегетарианское блюдо",
+            "example": false
+          },
+          "is_spicy": {
+            "type": "boolean",
+            "description": "Острое блюдо",
+            "example": false
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL изображения блюда",
+            "example": "https://example.com/image.jpg"
+          }
+        }
+      },
+      "RestaurantResponseDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_id": {
+            "type": "number",
+            "description": "Уникальный идентификатор ресторана",
+            "example": 1
+          },
+          "restaurant_name": {
+            "type": "string",
+            "description": "Название ресторана",
+            "example": "Ресторан \"Тбилиси\"",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "restaurant_description": {
+            "type": "string",
+            "description": "Описание ресторана",
+            "example": "Аутентичная грузинская кухня в самом сердце города"
+          },
+          "country": {
+            "type": "string",
+            "description": "Страна",
+            "example": "Грузия",
+            "default": "Грузия"
+          },
+          "city": {
+            "type": "string",
+            "description": "Город",
+            "example": "Тбилиси",
+            "default": "Тбилиси"
+          },
+          "street_address": {
+            "type": "string",
+            "description": "Адрес ресторана",
+            "example": "ул. Руставели, 15"
+          },
+          "working_hours": {
+            "type": "object",
+            "description": "Часы работы по дням недели",
+            "example": {
+              "monday": "10:00-22:00",
+              "tuesday": "10:00-22:00",
+              "wednesday": "10:00-22:00",
+              "thursday": "10:00-22:00",
+              "friday": "10:00-23:00",
+              "saturday": "10:00-23:00",
+              "sunday": "12:00-21:00"
+            }
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Активен ли ресторан",
+            "example": true,
+            "default": true
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг ресторана",
+            "example": 4.5,
+            "minimum": 0,
+            "maximum": 5
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2024-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "restaurant_id",
+          "restaurant_name",
+          "country",
+          "city",
+          "street_address",
+          "is_active",
+          "rating",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "RestaurantDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_id": {
+            "type": "number",
+            "description": "Уникальный идентификатор ресторана",
+            "example": 1
+          },
+          "restaurant_name": {
+            "type": "string",
+            "description": "Название ресторана",
+            "example": "Ресторан \"Тбилиси\"",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "restaurant_description": {
+            "type": "string",
+            "description": "Описание ресторана",
+            "example": "Аутентичная грузинская кухня в самом сердце города"
+          },
+          "country": {
+            "type": "string",
+            "description": "Страна",
+            "example": "Грузия",
+            "default": "Грузия"
+          },
+          "city": {
+            "type": "string",
+            "description": "Город",
+            "example": "Тбилиси",
+            "default": "Тбилиси"
+          },
+          "street_address": {
+            "type": "string",
+            "description": "Адрес ресторана",
+            "example": "ул. Руставели, 15"
+          },
+          "working_hours": {
+            "type": "object",
+            "description": "Часы работы по дням недели",
+            "example": {
+              "monday": "10:00-22:00",
+              "tuesday": "10:00-22:00",
+              "wednesday": "10:00-22:00",
+              "thursday": "10:00-22:00",
+              "friday": "10:00-23:00",
+              "saturday": "10:00-23:00",
+              "sunday": "12:00-21:00"
+            }
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Активен ли ресторан",
+            "example": true,
+            "default": true
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг ресторана",
+            "example": 4.5,
+            "minimum": 0,
+            "maximum": 5
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "stats": {
+            "type": "object",
+            "description": "Статистика ресторана"
+          }
+        },
+        "required": [
+          "restaurant_id",
+          "restaurant_name",
+          "country",
+          "city",
+          "street_address",
+          "is_active",
+          "rating",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateRestaurantDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_name": {
+            "type": "string",
+            "description": "Название ресторана",
+            "example": "Ресторан \"Тбилиси\"",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "restaurant_description": {
+            "type": "string",
+            "description": "Описание ресторана",
+            "example": "Аутентичная грузинская кухня в самом сердце города"
+          },
+          "country": {
+            "type": "string",
+            "description": "Страна",
+            "example": "Грузия",
+            "default": "Грузия"
+          },
+          "city": {
+            "type": "string",
+            "description": "Город",
+            "example": "Тбилиси",
+            "default": "Тбилиси"
+          },
+          "street_address": {
+            "type": "string",
+            "description": "Адрес ресторана",
+            "example": "ул. Руставели, 15",
+            "minLength": 5
+          },
+          "working_hours": {
+            "type": "object",
+            "description": "Часы работы по дням недели",
+            "example": {
+              "monday": "10:00-22:00",
+              "tuesday": "10:00-22:00",
+              "wednesday": "10:00-22:00",
+              "thursday": "10:00-22:00",
+              "friday": "10:00-23:00",
+              "saturday": "10:00-23:00",
+              "sunday": "12:00-21:00"
+            }
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Активен ли ресторан",
+            "example": true,
+            "default": true
+          }
+        },
+        "required": [
+          "restaurant_name",
+          "street_address"
+        ]
+      },
+      "UpdateRestaurantDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_name": {
+            "type": "string",
+            "description": "Название ресторана",
+            "example": "Ресторан \"Тбилиси\"",
+            "minLength": 3,
+            "maxLength": 100
+          },
+          "restaurant_description": {
+            "type": "string",
+            "description": "Описание ресторана",
+            "example": "Аутентичная грузинская кухня в самом сердце города"
+          },
+          "country": {
+            "type": "string",
+            "description": "Страна",
+            "example": "Грузия"
+          },
+          "city": {
+            "type": "string",
+            "description": "Город",
+            "example": "Тбилиси"
+          },
+          "street_address": {
+            "type": "string",
+            "description": "Адрес ресторана",
+            "example": "ул. Руставели, 15",
+            "minLength": 5
+          },
+          "working_hours": {
+            "type": "object",
+            "description": "Часы работы по дням недели",
+            "example": {
+              "monday": "10:00-22:00",
+              "tuesday": "10:00-22:00",
+              "wednesday": "10:00-22:00",
+              "thursday": "10:00-22:00",
+              "friday": "10:00-23:00",
+              "saturday": "10:00-23:00",
+              "sunday": "12:00-21:00"
+            }
+          },
+          "is_active": {
+            "type": "boolean",
+            "description": "Активен ли ресторан",
+            "example": true
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг ресторана (только для админов)",
+            "example": 4.5,
+            "minimum": 0,
+            "maximum": 5
+          }
+        }
+      }
+    }
+  }
+}

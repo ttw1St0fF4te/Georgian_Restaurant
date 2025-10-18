@@ -12,6 +12,9 @@ const config_1 = require("@nestjs/config");
 const database_module_1 = require("./database/database.module");
 const health_module_1 = require("./health/health.module");
 const audit_module_1 = require("./audit/audit.module");
+const menu_categories_module_1 = require("./menu-categories/menu-categories.module");
+const menu_module_1 = require("./menu/menu.module");
+const restaurants_module_1 = require("./restaurants/restaurants.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 let AppModule = class AppModule {
@@ -27,6 +30,9 @@ exports.AppModule = AppModule = __decorate([
             database_module_1.DatabaseModule,
             health_module_1.HealthModule,
             audit_module_1.AuditModule,
+            menu_categories_module_1.MenuCategoriesModule,
+            menu_module_1.MenuModule,
+            restaurants_module_1.RestaurantsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
