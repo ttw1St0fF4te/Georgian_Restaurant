@@ -1,0 +1,198 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthService = void 0;
+const common_1 = require("@nestjs/common");
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_2 = require("typeorm");
+const jwt_1 = require("@nestjs/jwt");
+const bcrypt = require("bcrypt");
+const user_entity_1 = require("../entities/user.entity");
+const user_role_entity_1 = require("../entities/user-role.entity");
+let AuthService = class AuthService {
+    constructor(userRepository, userRoleRepository, jwtService) {
+        this.userRepository = userRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.jwtService = jwtService;
+    }
+    async validateUser(username, password) {
+        console.log('🔍 Attempting to validate user:', username);
+        const user = await this.userRepository.findOne({
+            where: [
+                { username },
+                { email: username },
+            ],
+            relations: ['role'],
+        });
+        console.log('👤 User found:', user ? 'YES' : 'NO');
+        if (user) {
+            console.log('📧 User email:', user.email);
+            console.log('🔑 Password hash:', user.password_hash ? user.password_hash.substring(0, 10) + '...' : 'NO HASH');
+            const passwordMatch = await bcrypt.compare(password, user.password_hash);
+            console.log('🔐 Password match:', passwordMatch);
+            if (passwordMatch) {
+                const { password_hash, ...result } = user;
+                console.log('✅ User validated successfully');
+                return result;
+            }
+        }
+        console.log('❌ User validation failed');
+        return null;
+    }
+    async login(loginDto) {
+        const user = await this.validateUser(loginDto.username, loginDto.password);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Неверный логин или пароль');
+        }
+        const userRole = await this.userRoleRepository.findOne({
+            where: { role_id: user.role_id },
+        });
+        if (!userRole) {
+            throw new common_1.UnauthorizedException('Роль пользователя не найдена');
+        }
+        await this.userRepository.update(user.user_id, {
+            last_login: new Date(),
+        });
+        const payload = {
+            sub: user.user_id,
+            username: user.username,
+            email: user.email,
+            role: userRole.role_name,
+            role_id: user.role_id,
+        };
+        return {
+            access_token: this.jwtService.sign(payload),
+            user: {
+                user_id: user.user_id,
+                username: user.username,
+                email: user.email,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                role: userRole.role_name,
+                role_id: user.role_id,
+            },
+        };
+    }
+    async getProfile(userId) {
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+            relations: ['role'],
+            select: [
+                'user_id',
+                'username',
+                'email',
+                'first_name',
+                'last_name',
+                'phone',
+                'role_id',
+                'created_at',
+                'last_login',
+            ],
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('Пользователь не найден');
+        }
+        const userRole = await this.userRoleRepository.findOne({
+            where: { role_id: user.role_id },
+        });
+        return {
+            ...user,
+            role: userRole?.role_name || 'guest',
+        };
+    }
+    async register(registerDto) {
+        const { username, email, password, first_name, last_name, phone } = registerDto;
+        const existingUserByUsername = await this.userRepository.findOne({
+            where: { username },
+        });
+        if (existingUserByUsername) {
+            throw new common_1.ConflictException('Username уже занят');
+        }
+        const existingUserByEmail = await this.userRepository.findOne({
+            where: { email },
+        });
+        if (existingUserByEmail) {
+            throw new common_1.ConflictException('Email уже зарегистрирован');
+        }
+        const userRole = await this.userRoleRepository.findOne({
+            where: { role_name: 'user' },
+        });
+        if (!userRole) {
+            throw new common_1.BadRequestException('Роль пользователя не найдена');
+        }
+        const saltRounds = 12;
+        const password_hash = await bcrypt.hash(password, saltRounds);
+        const newUser = this.userRepository.create({
+            username,
+            email,
+            password_hash,
+            first_name,
+            last_name,
+            phone: phone || null,
+            role_id: userRole.role_id,
+        });
+        try {
+            const savedUser = await this.userRepository.save(newUser);
+            const payload = {
+                sub: savedUser.user_id,
+                username: savedUser.username,
+                email: savedUser.email,
+                role: userRole.role_name,
+                role_id: savedUser.role_id,
+            };
+            return {
+                access_token: this.jwtService.sign(payload),
+                user: {
+                    user_id: savedUser.user_id,
+                    username: savedUser.username,
+                    email: savedUser.email,
+                    first_name: savedUser.first_name,
+                    last_name: savedUser.last_name,
+                    role: userRole.role_name,
+                    role_id: savedUser.role_id,
+                },
+            };
+        }
+        catch (error) {
+            if (error.code === '23505') {
+                if (error.detail.includes('username')) {
+                    throw new common_1.ConflictException('Username уже занят');
+                }
+                if (error.detail.includes('email')) {
+                    throw new common_1.ConflictException('Email уже зарегистрирован');
+                }
+            }
+            throw new common_1.BadRequestException('Ошибка при создании пользователя');
+        }
+    }
+    async getUserDatabaseRole(role) {
+        const roleMapping = {
+            admin: 'restaurant_admin',
+            manager: 'restaurant_manager',
+            user: 'restaurant_user',
+            guest: 'restaurant_guest',
+        };
+        return roleMapping[role] || 'restaurant_guest';
+    }
+};
+exports.AuthService = AuthService;
+exports.AuthService = AuthService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
+    __param(1, (0, typeorm_1.InjectRepository)(user_role_entity_1.UserRole)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        jwt_1.JwtService])
+], AuthService);
+//# sourceMappingURL=auth.service.js.map

@@ -59,7 +59,7 @@ __decorate([
     __metadata("design:type", Date)
 ], User.prototype, "last_login", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)('UserRole', 'users', { onDelete: 'RESTRICT' }),
+    (0, typeorm_1.ManyToOne)('UserRole', { onDelete: 'RESTRICT' }),
     (0, typeorm_1.JoinColumn)({ name: 'role_id' }),
     __metadata("design:type", Object)
 ], User.prototype, "role", void 0);

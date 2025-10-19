@@ -17,6 +17,7 @@ import {
   ApiQuery,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MenuService } from './menu.service';
 import {
@@ -26,6 +27,8 @@ import {
   MenuFilterDto,
   MenuPaginationResponseDto,
 } from './dto/menu.dto';
+import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Menu')
 @Controller('menu')
@@ -33,6 +36,7 @@ export class MenuController {
   constructor(private readonly menuService: MenuService) {}
 
   @Get()
+  @Public() // Доступно всем, включая неавторизованных пользователей
   @ApiOperation({
     summary: 'Получить меню с фильтрацией и поиском',
     description: `Возвращает список блюд меню с поддержкой:
@@ -52,6 +56,7 @@ export class MenuController {
   }
 
   @Get('category/:categoryId')
+  @Public() // Доступно всем
   @ApiOperation({
     summary: 'Получить блюда по категории',
     description: 'Возвращает список блюд определенной категории с поддержкой фильтрации',
@@ -77,6 +82,7 @@ export class MenuController {
   }
 
   @Get(':id')
+  @Public() // Доступно всем
   @ApiOperation({
     summary: 'Получить блюдо по ID',
     description: 'Возвращает детальную информацию о блюде с информацией о категории',
@@ -99,6 +105,8 @@ export class MenuController {
   }
 
   @Post()
+  @Roles('manager', 'admin') // Только менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Создать новое блюдо',
     description: 'Создает новое блюдо в меню',
@@ -116,6 +124,8 @@ export class MenuController {
   }
 
   @Patch(':id')
+  @Roles('manager', 'admin') // Только менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Обновить блюдо',
     description: 'Обновляет информацию о блюде',
@@ -144,6 +154,8 @@ export class MenuController {
   }
 
   @Delete(':id')
+  @Roles('admin') // Только администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Удалить блюдо',
     description: 'Полностью удаляет блюдо из базы данных',
@@ -166,6 +178,8 @@ export class MenuController {
   }
 
   @Patch(':id/soft-delete')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Мягкое удаление блюда',
     description: 'Помечает блюдо как удаленное (is_deleted = true), но не удаляет из БД',
@@ -188,6 +202,8 @@ export class MenuController {
   }
 
   @Patch(':id/restore')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Восстановить удаленное блюдо',
     description: 'Восстанавливает мягко удаленное блюдо (is_deleted = false)',

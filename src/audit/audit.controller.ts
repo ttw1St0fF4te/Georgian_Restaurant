@@ -1,10 +1,13 @@
 import { Controller, Get, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AuditService, AuditLogFilter } from './audit.service';
 import { AuditOperation } from '../entities/audit-log.entity';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('audit')
 @Controller('audit')
+@Roles('manager', 'admin') // Аудит доступен только менеджерам и администраторам
+@ApiBearerAuth()
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 

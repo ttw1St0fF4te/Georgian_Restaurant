@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const menu_service_1 = require("./menu.service");
 const menu_dto_1 = require("./dto/menu.dto");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let MenuController = class MenuController {
     constructor(menuService) {
         this.menuService = menuService;
@@ -50,6 +52,7 @@ let MenuController = class MenuController {
 exports.MenuController = MenuController;
 __decorate([
     (0, common_1.Get)(),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить меню с фильтрацией и поиском',
         description: `Возвращает список блюд меню с поддержкой:
@@ -71,6 +74,7 @@ __decorate([
 ], MenuController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('category/:categoryId'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить блюда по категории',
         description: 'Возвращает список блюд определенной категории с поддержкой фильтрации',
@@ -96,6 +100,7 @@ __decorate([
 ], MenuController.prototype, "findByCategory", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить блюдо по ID',
         description: 'Возвращает детальную информацию о блюде с информацией о категории',
@@ -120,6 +125,8 @@ __decorate([
 ], MenuController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Создать новое блюдо',
         description: 'Создает новое блюдо в меню',
@@ -139,6 +146,8 @@ __decorate([
 ], MenuController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Обновить блюдо',
         description: 'Обновляет информацию о блюде',
@@ -167,6 +176,8 @@ __decorate([
 ], MenuController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Удалить блюдо',
         description: 'Полностью удаляет блюдо из базы данных',
@@ -190,6 +201,8 @@ __decorate([
 ], MenuController.prototype, "remove", null);
 __decorate([
     (0, common_1.Patch)(':id/soft-delete'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Мягкое удаление блюда',
         description: 'Помечает блюдо как удаленное (is_deleted = true), но не удаляет из БД',
@@ -214,6 +227,8 @@ __decorate([
 ], MenuController.prototype, "softDelete", null);
 __decorate([
     (0, common_1.Patch)(':id/restore'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Восстановить удаленное блюдо',
         description: 'Восстанавливает мягко удаленное блюдо (is_deleted = false)',

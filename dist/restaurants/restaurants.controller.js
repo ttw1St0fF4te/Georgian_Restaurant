@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const restaurants_service_1 = require("./restaurants.service");
 const restaurant_dto_1 = require("./dto/restaurant.dto");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let RestaurantsController = class RestaurantsController {
     constructor(restaurantsService) {
         this.restaurantsService = restaurantsService;
@@ -47,6 +49,7 @@ let RestaurantsController = class RestaurantsController {
 exports.RestaurantsController = RestaurantsController;
 __decorate([
     (0, common_1.Get)(),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить список ресторанов',
         description: `Возвращает список ресторанов с поддержкой фильтрации:
@@ -68,6 +71,7 @@ __decorate([
 ], RestaurantsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить ресторан по ID',
         description: `Возвращает детальную информацию о ресторане включая:
@@ -94,6 +98,8 @@ __decorate([
 ], RestaurantsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Создать новый ресторан',
         description: 'Создает новый ресторан в системе',
@@ -113,6 +119,8 @@ __decorate([
 ], RestaurantsController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Обновить ресторан',
         description: 'Обновляет информацию о ресторане',
@@ -141,6 +149,8 @@ __decorate([
 ], RestaurantsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Удалить ресторан',
         description: 'Полностью удаляет ресторан из системы',
@@ -164,6 +174,8 @@ __decorate([
 ], RestaurantsController.prototype, "remove", null);
 __decorate([
     (0, common_1.Patch)(':id/deactivate'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Деактивировать ресторан',
         description: 'Помечает ресторан как неактивный (is_active = false)',
@@ -188,6 +200,8 @@ __decorate([
 ], RestaurantsController.prototype, "deactivate", null);
 __decorate([
     (0, common_1.Patch)(':id/activate'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Активировать ресторан',
         description: 'Помечает ресторан как активный (is_active = true)',

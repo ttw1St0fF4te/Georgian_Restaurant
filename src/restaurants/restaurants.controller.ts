@@ -16,6 +16,7 @@ import {
   ApiParam,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { RestaurantsService } from './restaurants.service';
 import {
@@ -25,6 +26,8 @@ import {
   RestaurantDetailResponseDto,
   RestaurantFilterDto,
 } from './dto/restaurant.dto';
+import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Restaurants')
 @Controller('restaurants')
@@ -32,6 +35,7 @@ export class RestaurantsController {
   constructor(private readonly restaurantsService: RestaurantsService) {}
 
   @Get()
+  @Public() // Доступно всем для просмотра списка ресторанов
   @ApiOperation({
     summary: 'Получить список ресторанов',
     description: `Возвращает список ресторанов с поддержкой фильтрации:
@@ -51,6 +55,7 @@ export class RestaurantsController {
   }
 
   @Get(':id')
+  @Public() // Доступно всем для просмотра деталей ресторана
   @ApiOperation({
     summary: 'Получить ресторан по ID',
     description: `Возвращает детальную информацию о ресторане включая:
@@ -75,6 +80,8 @@ export class RestaurantsController {
   }
 
   @Post()
+  @Roles('admin') // Только администраторы могут создавать рестораны
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Создать новый ресторан',
     description: 'Создает новый ресторан в системе',
@@ -92,6 +99,8 @@ export class RestaurantsController {
   }
 
   @Patch(':id')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Обновить ресторан',
     description: 'Обновляет информацию о ресторане',
@@ -120,6 +129,8 @@ export class RestaurantsController {
   }
 
   @Delete(':id')
+  @Roles('admin') // Только администраторы могут полностью удалять рестораны
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Удалить ресторан',
     description: 'Полностью удаляет ресторан из системы',
@@ -142,6 +153,8 @@ export class RestaurantsController {
   }
 
   @Patch(':id/deactivate')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Деактивировать ресторан',
     description: 'Помечает ресторан как неактивный (is_active = false)',
@@ -164,6 +177,8 @@ export class RestaurantsController {
   }
 
   @Patch(':id/activate')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Активировать ресторан',
     description: 'Помечает ресторан как активный (is_active = true)',

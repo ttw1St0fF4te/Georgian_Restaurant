@@ -218,6 +218,11 @@
             "description": "Записи аудита успешно получены"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Получить записи аудита с фильтрацией",
         "tags": [
           "audit"
@@ -244,6 +249,11 @@
             "description": "Последние записи аудита получены"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Получить последние записи аудита",
         "tags": [
           "audit"
@@ -276,6 +286,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "audit"
         ]
@@ -308,6 +323,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Получить статистику аудита",
         "tags": [
           "audit"
@@ -332,6 +352,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "audit"
         ]
@@ -363,8 +388,132 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "audit"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid credentials"
+          }
+        },
+        "summary": "User login",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation failed"
+          },
+          "409": {
+            "description": "Conflict - Username or email already exists"
+          }
+        },
+        "summary": "User registration",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user profile",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Logout successful"
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing token"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "User logout",
+        "tags": [
+          "Authentication"
         ]
       }
     },
@@ -422,6 +571,11 @@
             "description": "Некорректные данные для создания категории"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Создать новую категорию",
         "tags": [
           "Menu Categories"
@@ -507,6 +661,11 @@
             "description": "Категория с указанным ID не найдена"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Обновить категорию",
         "tags": [
           "Menu Categories"
@@ -535,6 +694,11 @@
             "description": "Категория с указанным ID не найдена"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Удалить категорию",
         "tags": [
           "Menu Categories"
@@ -727,6 +891,11 @@
             "description": "Некорректные данные для создания блюда или категория не найдена"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Создать новое блюдо",
         "tags": [
           "Menu"
@@ -983,6 +1152,11 @@
             "description": "Блюдо с указанным ID не найдено"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Обновить блюдо",
         "tags": [
           "Menu"
@@ -1011,6 +1185,11 @@
             "description": "Блюдо с указанным ID не найдено"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Удалить блюдо",
         "tags": [
           "Menu"
@@ -1048,6 +1227,11 @@
             "description": "Блюдо с указанным ID не найдено"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Мягкое удаление блюда",
         "tags": [
           "Menu"
@@ -1085,6 +1269,11 @@
             "description": "Блюдо с указанным ID не найдено"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Восстановить удаленное блюдо",
         "tags": [
           "Menu"
@@ -1199,6 +1388,11 @@
             "description": "Некорректные данные для создания ресторана"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Создать новый ресторан",
         "tags": [
           "Restaurants"
@@ -1284,6 +1478,11 @@
             "description": "Ресторан с указанным ID не найден"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Обновить ресторан",
         "tags": [
           "Restaurants"
@@ -1312,6 +1511,11 @@
             "description": "Ресторан с указанным ID не найден"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Удалить ресторан",
         "tags": [
           "Restaurants"
@@ -1349,6 +1553,11 @@
             "description": "Ресторан с указанным ID не найден"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Деактивировать ресторан",
         "tags": [
           "Restaurants"
@@ -1386,6 +1595,11 @@
             "description": "Ресторан с указанным ID не найден"
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "summary": "Активировать ресторан",
         "tags": [
           "Restaurants"
@@ -1455,6 +1669,57 @@
       }
     },
     "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username or email",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "User password",
+            "example": "password123",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "description": "JWT access token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "user": {
+            "type": "object",
+            "description": "User information",
+            "example": {
+              "user_id": "uuid-here",
+              "username": "admin",
+              "email": "admin@georgian-restaurant.ge",
+              "first_name": "Тенгиз",
+              "last_name": "Админидзе",
+              "role": "admin",
+              "role_id": 1
+            }
+          }
+        },
+        "required": [
+          "access_token",
+          "user"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {}
+      },
       "MenuCategoryResponseDto": {
         "type": "object",
         "properties": {

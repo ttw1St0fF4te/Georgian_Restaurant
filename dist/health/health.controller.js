@@ -13,6 +13,7 @@ exports.HealthController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const health_service_1 = require("./health.service");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
 let HealthController = class HealthController {
     constructor(healthService) {
         this.healthService = healthService;
@@ -102,6 +103,7 @@ __decorate([
 exports.HealthController = HealthController = __decorate([
     (0, swagger_1.ApiTags)('health'),
     (0, common_1.Controller)('health'),
+    (0, public_decorator_1.Public)(),
     __metadata("design:paramtypes", [health_service_1.HealthService])
 ], HealthController);
 //# sourceMappingURL=health.controller.js.map

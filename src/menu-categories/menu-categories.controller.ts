@@ -15,6 +15,7 @@ import {
   ApiParam,
   ApiBadRequestResponse,
   ApiNotFoundResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { MenuCategoriesService } from './menu-categories.service';
 import {
@@ -22,6 +23,8 @@ import {
   UpdateMenuCategoryDto,
   MenuCategoryResponseDto,
 } from './dto/menu-category.dto';
+import { Public } from '../auth/decorators/public.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('Menu Categories')
 @Controller('menu-categories')
@@ -29,6 +32,7 @@ export class MenuCategoriesController {
   constructor(private readonly menuCategoriesService: MenuCategoriesService) {}
 
   @Get()
+  @Public() // Доступно всем
   @ApiOperation({
     summary: 'Получить все категории меню',
     description: 'Возвращает список всех категорий меню, отсортированных по названию',
@@ -43,6 +47,7 @@ export class MenuCategoriesController {
   }
 
   @Get(':id')
+  @Public() // Доступно всем
   @ApiOperation({
     summary: 'Получить категорию по ID',
     description: 'Возвращает детальную информацию о категории меню',
@@ -65,6 +70,8 @@ export class MenuCategoriesController {
   }
 
   @Post()
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Создать новую категорию',
     description: 'Создает новую категорию меню',
@@ -82,6 +89,8 @@ export class MenuCategoriesController {
   }
 
   @Patch(':id')
+  @Roles('manager', 'admin') // Менеджеры и администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Обновить категорию',
     description: 'Обновляет информацию о категории меню',
@@ -110,6 +119,8 @@ export class MenuCategoriesController {
   }
 
   @Delete(':id')
+  @Roles('admin') // Только администраторы
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Удалить категорию',
     description: 'Удаляет категорию меню',

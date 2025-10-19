@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const audit_service_1 = require("./audit.service");
 const audit_log_entity_1 = require("../entities/audit-log.entity");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let AuditController = class AuditController {
     constructor(auditService) {
         this.auditService = auditService;
@@ -136,6 +137,8 @@ __decorate([
 exports.AuditController = AuditController = __decorate([
     (0, swagger_1.ApiTags)('audit'),
     (0, common_1.Controller)('audit'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [audit_service_1.AuditService])
 ], AuditController);
 //# sourceMappingURL=audit.controller.js.map

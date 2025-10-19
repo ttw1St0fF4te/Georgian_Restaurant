@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const menu_categories_service_1 = require("./menu-categories.service");
 const menu_category_dto_1 = require("./dto/menu-category.dto");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let MenuCategoriesController = class MenuCategoriesController {
     constructor(menuCategoriesService) {
         this.menuCategoriesService = menuCategoriesService;
@@ -41,6 +43,7 @@ let MenuCategoriesController = class MenuCategoriesController {
 exports.MenuCategoriesController = MenuCategoriesController;
 __decorate([
     (0, common_1.Get)(),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить все категории меню',
         description: 'Возвращает список всех категорий меню, отсортированных по названию',
@@ -56,6 +59,7 @@ __decorate([
 ], MenuCategoriesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить категорию по ID',
         description: 'Возвращает детальную информацию о категории меню',
@@ -80,6 +84,8 @@ __decorate([
 ], MenuCategoriesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Создать новую категорию',
         description: 'Создает новую категорию меню',
@@ -99,6 +105,8 @@ __decorate([
 ], MenuCategoriesController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Обновить категорию',
         description: 'Обновляет информацию о категории меню',
@@ -127,6 +135,8 @@ __decorate([
 ], MenuCategoriesController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, roles_decorator_1.Roles)('admin'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Удалить категорию',
         description: 'Удаляет категорию меню',

@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AppService } from './app.service';
+import { Public } from './auth/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller()
@@ -8,6 +9,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
+  @Public() // Публичный эндпоинт
   @ApiOperation({ 
     summary: 'Получить информацию о приложении',
     description: 'Возвращает базовую информацию о Georgian Restaurant API'

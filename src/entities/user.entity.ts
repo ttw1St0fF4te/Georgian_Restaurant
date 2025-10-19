@@ -36,7 +36,7 @@ export class User {
   last_login: Date;
 
   // Relations
-  @ManyToOne('UserRole', 'users', { onDelete: 'RESTRICT' })
+  @ManyToOne('UserRole', { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'role_id' })
   role: any;
 
