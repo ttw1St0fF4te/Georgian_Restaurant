@@ -9,6 +9,9 @@ import { UserRole } from '../entities/user-role.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto, JwtPayload } from './dto/auth-response.dto';
+import { RegisterResponseDto } from './dto/register-response.dto';
+import { UpdateProfileDto } from '../users/dto/update-profile.dto';
+import { ChangePasswordDto } from '../users/dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +55,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.validateUser(loginDto.username, loginDto.password);
+    const user = await this.validateUser(loginDto.usernameOrEmail, loginDto.password);
     
     if (!user) {
       throw new UnauthorizedException('Неверный логин или пароль');
@@ -125,7 +128,7 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
+  async register(registerDto: RegisterDto): Promise<RegisterResponseDto> {
     const { username, email, password, first_name, last_name, phone } = registerDto;
 
     // Проверяем уникальность username
@@ -173,17 +176,11 @@ export class AuthService {
     try {
       const savedUser = await this.userRepository.save(newUser);
 
-      // Автоматически логиним пользователя после регистрации
-      const payload: JwtPayload = {
-        sub: savedUser.user_id,
-        username: savedUser.username,
-        email: savedUser.email,
-        role: userRole.role_name,
-        role_id: savedUser.role_id,
-      };
-
+      // Возвращаем информацию о пользователе без JWT токена
+      // Пользователь должен войти отдельно через /auth/login
       return {
-        access_token: this.jwtService.sign(payload),
+        status: 'success',
+        message: 'Пользователь успешно зарегистрирован. Пожалуйста, войдите в систему.',
         user: {
           user_id: savedUser.user_id,
           username: savedUser.username,
@@ -193,6 +190,7 @@ export class AuthService {
           role: userRole.role_name,
           role_id: savedUser.role_id,
         },
+        created_at: savedUser.created_at.toISOString(),
       };
     } catch (error) {
       // Обработка ошибок базы данных
@@ -219,5 +217,69 @@ export class AuthService {
     };
 
     return roleMapping[role] || 'restaurant_guest';
+  }
+
+  /**
+   * Обновление профиля пользователя.
+   * Вызывает транзакционную функцию на уровне БД `update_user_profile_transactional`.
+   * Обновляет только переданные поля.
+   */
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<any> {
+    // Вызываем функцию БД через raw query с DEFAULT для неуказанных полей
+    const result = await this.userRepository.query(
+      `SELECT update_user_profile_transactional(
+        $1::uuid, 
+        $2::text, 
+        $3::text, 
+        $4::text, 
+        $5::text, 
+        $6::text, 
+        $7::text, 
+        NULL::text
+      ) as res`,
+      [
+        userId, 
+        dto.first_name || null,
+        dto.last_name || null,
+        dto.phone || null,
+        dto.country || null,
+        dto.city || null,
+        dto.street_address || null
+      ],
+    );
+
+    return result[0]?.res || null;
+  }
+
+  /**
+   * Смена пароля: проверяем текущий пароль, хешируем новый и вызываем updateProfile для записи в БД.
+   */
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<any> {
+    // Получаем пользователя с хэшем
+    const user = await this.userRepository.findOne({ where: { user_id: userId } });
+    if (!user) throw new UnauthorizedException('Пользователь не найден');
+
+    const match = await bcrypt.compare(dto.current_password, user.password_hash);
+    if (!match) throw new UnauthorizedException('Текущий пароль неверный');
+
+    const saltRounds = 12;
+    const newHash = await bcrypt.hash(dto.new_password, saltRounds);
+
+    // Используем update_user_profile_transactional для атомарного обновления password_hash
+    const result = await this.userRepository.query(
+      `SELECT update_user_profile_transactional(
+        $1::uuid, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        $2::text
+      ) as res`,
+      [userId, newHash],
+    );
+
+    return result[0]?.res || null;
   }
 }

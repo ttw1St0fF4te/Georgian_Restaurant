@@ -51,7 +51,7 @@ let AuthService = class AuthService {
         return null;
     }
     async login(loginDto) {
-        const user = await this.validateUser(loginDto.username, loginDto.password);
+        const user = await this.validateUser(loginDto.usernameOrEmail, loginDto.password);
         if (!user) {
             throw new common_1.UnauthorizedException('Неверный логин или пароль');
         }
@@ -144,15 +144,9 @@ let AuthService = class AuthService {
         });
         try {
             const savedUser = await this.userRepository.save(newUser);
-            const payload = {
-                sub: savedUser.user_id,
-                username: savedUser.username,
-                email: savedUser.email,
-                role: userRole.role_name,
-                role_id: savedUser.role_id,
-            };
             return {
-                access_token: this.jwtService.sign(payload),
+                status: 'success',
+                message: 'Пользователь успешно зарегистрирован. Пожалуйста, войдите в систему.',
                 user: {
                     user_id: savedUser.user_id,
                     username: savedUser.username,
@@ -162,6 +156,7 @@ let AuthService = class AuthService {
                     role: userRole.role_name,
                     role_id: savedUser.role_id,
                 },
+                created_at: savedUser.created_at.toISOString(),
             };
         }
         catch (error) {
@@ -184,6 +179,48 @@ let AuthService = class AuthService {
             guest: 'restaurant_guest',
         };
         return roleMapping[role] || 'restaurant_guest';
+    }
+    async updateProfile(userId, dto) {
+        const result = await this.userRepository.query(`SELECT update_user_profile_transactional(
+        $1::uuid, 
+        $2::text, 
+        $3::text, 
+        $4::text, 
+        $5::text, 
+        $6::text, 
+        $7::text, 
+        NULL::text
+      ) as res`, [
+            userId,
+            dto.first_name || null,
+            dto.last_name || null,
+            dto.phone || null,
+            dto.country || null,
+            dto.city || null,
+            dto.street_address || null
+        ]);
+        return result[0]?.res || null;
+    }
+    async changePassword(userId, dto) {
+        const user = await this.userRepository.findOne({ where: { user_id: userId } });
+        if (!user)
+            throw new common_1.UnauthorizedException('Пользователь не найден');
+        const match = await bcrypt.compare(dto.current_password, user.password_hash);
+        if (!match)
+            throw new common_1.UnauthorizedException('Текущий пароль неверный');
+        const saltRounds = 12;
+        const newHash = await bcrypt.hash(dto.new_password, saltRounds);
+        const result = await this.userRepository.query(`SELECT update_user_profile_transactional(
+        $1::uuid, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        NULL::text, 
+        $2::text
+      ) as res`, [userId, newHash]);
+        return result[0]?.res || null;
     }
 };
 exports.AuthService = AuthService;

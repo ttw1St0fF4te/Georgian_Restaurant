@@ -449,11 +449,58 @@
         },
         "responses": {
           "201": {
-            "description": "Registration successful",
+            "description": "Пользователь успешно зарегистрирован. Необходимо войти через /auth/login",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AuthResponseDto"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Пользователь успешно зарегистрирован. Пожалуйста, войдите в систему."
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "user_id": {
+                          "type": "string",
+                          "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "new_user"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "user@example.com"
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Имя"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Фамилия"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "user"
+                        },
+                        "role_id": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2025-10-19T20:15:30.000Z"
+                    }
+                  }
                 }
               }
             }
@@ -477,10 +524,61 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "User profile retrieved successfully"
+            "description": "Профиль пользователя успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "string",
+                      "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "testuser123"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "test@example.com"
+                    },
+                    "first_name": {
+                      "type": "string",
+                      "example": "John"
+                    },
+                    "last_name": {
+                      "type": "string",
+                      "example": "Doe"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "+1234567890",
+                      "nullable": true
+                    },
+                    "role_id": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "last_login": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
           },
           "401": {
-            "description": "Unauthorized - Invalid or missing token"
+            "description": "Пользователь не авторизован или токен недействителен"
           }
         },
         "security": [
@@ -488,7 +586,119 @@
             "bearer": []
           }
         ],
-        "summary": "Get user profile",
+        "summary": "Получение профиля пользователя",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "put": {
+        "operationId": "AuthController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Профиль успешно обновлён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile updated successfully"
+                    },
+                    "updated_user_id": {
+                      "type": "string",
+                      "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные или не указано ни одного поля для обновления"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Обновление профиля пользователя",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/profile/password": {
+      "post": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Пароль успешно изменён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Profile updated successfully"
+                    },
+                    "updated_user_id": {
+                      "type": "string",
+                      "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные пароля"
+          },
+          "401": {
+            "description": "Текущий пароль неверный или пользователь не авторизован"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Смена пароля пользователя",
         "tags": [
           "Authentication"
         ]
@@ -1672,10 +1882,10 @@
       "LoginDto": {
         "type": "object",
         "properties": {
-          "username": {
+          "usernameOrEmail": {
             "type": "string",
-            "description": "Username or email",
-            "example": "admin"
+            "description": "Username or email address",
+            "example": "admin or user@example.com"
           },
           "password": {
             "type": "string",
@@ -1685,7 +1895,7 @@
           }
         },
         "required": [
-          "username",
+          "usernameOrEmail",
           "password"
         ]
       },
@@ -1717,6 +1927,14 @@
         ]
       },
       "RegisterDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ChangePasswordDto": {
         "type": "object",
         "properties": {}
       },
