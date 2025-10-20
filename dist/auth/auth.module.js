@@ -20,13 +20,14 @@ const database_role_service_1 = require("./database-role.service");
 const token_blacklist_service_1 = require("./token-blacklist.service");
 const user_entity_1 = require("../entities/user.entity");
 const user_role_entity_1 = require("../entities/user-role.entity");
+const user_address_entity_1 = require("../entities/user-address.entity");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_role_entity_1.UserRole]),
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_role_entity_1.UserRole, user_address_entity_1.UserAddress]),
             passport_1.PassportModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],

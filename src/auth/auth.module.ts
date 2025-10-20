@@ -12,10 +12,11 @@ import { DatabaseRoleService } from './database-role.service';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/user-role.entity';
+import { UserAddress } from '../entities/user-address.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, UserRole]),
+    TypeOrmModule.forFeature([User, UserRole, UserAddress]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

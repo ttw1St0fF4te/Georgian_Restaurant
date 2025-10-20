@@ -20,10 +20,12 @@ const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcrypt");
 const user_entity_1 = require("../entities/user.entity");
 const user_role_entity_1 = require("../entities/user-role.entity");
+const user_address_entity_1 = require("../entities/user-address.entity");
 let AuthService = class AuthService {
-    constructor(userRepository, userRoleRepository, jwtService) {
+    constructor(userRepository, userRoleRepository, userAddressRepository, jwtService) {
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
+        this.userAddressRepository = userAddressRepository;
         this.jwtService = jwtService;
     }
     async validateUser(username, password) {
@@ -64,6 +66,11 @@ let AuthService = class AuthService {
         await this.userRepository.update(user.user_id, {
             last_login: new Date(),
         });
+        const userAddress = await this.userAddressRepository.findOne({
+            where: { user_id: user.user_id },
+            order: { created_at: 'DESC' },
+            select: ['country', 'city', 'street_address'],
+        });
         const payload = {
             sub: user.user_id,
             username: user.username,
@@ -79,8 +86,12 @@ let AuthService = class AuthService {
                 email: user.email,
                 first_name: user.first_name,
                 last_name: user.last_name,
+                phone: user.phone,
                 role: userRole.role_name,
                 role_id: user.role_id,
+                country: userAddress?.country || null,
+                city: userAddress?.city || null,
+                street_address: userAddress?.street_address || null,
             },
         };
     }
@@ -106,10 +117,28 @@ let AuthService = class AuthService {
         const userRole = await this.userRoleRepository.findOne({
             where: { role_id: user.role_id },
         });
-        return {
-            ...user,
+        const userAddress = await this.userAddressRepository.findOne({
+            where: { user_id: userId },
+            order: { created_at: 'DESC' },
+            select: ['country', 'city', 'street_address'],
+        });
+        const profile = {
+            user_id: user.user_id,
+            username: user.username,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            phone: user.phone,
+            role_id: user.role_id,
             role: userRole?.role_name || 'guest',
+            created_at: user.created_at,
+            last_login: user.last_login,
+            country: userAddress?.country || null,
+            city: userAddress?.city || null,
+            street_address: userAddress?.street_address || null,
         };
+        console.log('📋 Полный профиль пользователя:', profile);
+        return profile;
     }
     async register(registerDto) {
         const { username, email, password, first_name, last_name, phone } = registerDto;
@@ -207,7 +236,7 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Пользователь не найден');
         const match = await bcrypt.compare(dto.current_password, user.password_hash);
         if (!match)
-            throw new common_1.UnauthorizedException('Текущий пароль неверный');
+            throw new common_1.BadRequestException('Текущий пароль неверный');
         const saltRounds = 12;
         const newHash = await bcrypt.hash(dto.new_password, saltRounds);
         const result = await this.userRepository.query(`SELECT update_user_profile_transactional(
@@ -228,7 +257,9 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(user_role_entity_1.UserRole)),
+    __param(2, (0, typeorm_1.InjectRepository)(user_address_entity_1.UserAddress)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         jwt_1.JwtService])
 ], AuthService);

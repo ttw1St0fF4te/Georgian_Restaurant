@@ -3,4 +3,5 @@ export declare class TokenBlacklistService {
     addToBlacklist(token: string): void;
     isBlacklisted(token: string): boolean;
     clearExpiredTokens(): void;
+    getBlacklistSize(): number;
 }

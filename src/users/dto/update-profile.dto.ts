@@ -19,7 +19,7 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsString({ message: 'Телефон должен быть строкой' })
-  @Matches(/^\+?[1-9]\d{1,14}$/, { 
+  @Matches(/^\+?[1-9]\d{8,14}$/, { 
     message: 'Телефон должен быть в международном формате, например +79161234567' 
   })
   phone?: string;

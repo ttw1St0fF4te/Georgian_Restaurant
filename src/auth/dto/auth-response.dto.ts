@@ -23,8 +23,12 @@ export class AuthResponseDto {
       email: 'admin@georgian-restaurant.ge',
       first_name: 'Тенгиз',
       last_name: 'Админидзе',
+      phone: '+995591234567',
       role: 'admin',
       role_id: 1,
+      country: 'Грузия',
+      city: 'Тбилиси',
+      street_address: 'ул. Руставели 15',
     },
   })
   user: {
@@ -33,7 +37,11 @@ export class AuthResponseDto {
     email: string;
     first_name: string;
     last_name: string;
+    phone?: string;
     role: string;
     role_id: number;
+    country?: string;
+    city?: string;
+    street_address?: string;
   };
 }

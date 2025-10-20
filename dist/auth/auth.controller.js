@@ -48,7 +48,12 @@ let AuthController = class AuthController {
     }
     async changePassword(req, dto) {
         const userId = req.user.userId;
-        return this.authService.changePassword(userId, dto);
+        const result = await this.authService.changePassword(userId, dto);
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (token) {
+            this.tokenBlacklistService.addToBlacklist(token);
+        }
+        return result;
     }
     async logout(req) {
         const token = req.headers.authorization?.replace('Bearer ', '');
@@ -141,11 +146,14 @@ __decorate([
                 email: { type: 'string', example: 'test@example.com' },
                 first_name: { type: 'string', example: 'John' },
                 last_name: { type: 'string', example: 'Doe' },
-                phone: { type: 'string', example: '+1234567890', nullable: true },
+                phone: { type: 'string', example: '+995591234567', nullable: true },
                 role_id: { type: 'number', example: 3 },
                 role: { type: 'string', example: 'user' },
                 created_at: { type: 'string', format: 'date-time' },
-                last_login: { type: 'string', format: 'date-time', nullable: true }
+                last_login: { type: 'string', format: 'date-time', nullable: true },
+                country: { type: 'string', example: 'Грузия', nullable: true },
+                city: { type: 'string', example: 'Тбилиси', nullable: true },
+                street_address: { type: 'string', example: 'ул. Руставели 15', nullable: true }
             }
         }
     }),

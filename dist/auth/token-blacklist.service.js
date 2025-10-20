@@ -10,15 +10,40 @@ exports.TokenBlacklistService = void 0;
 const common_1 = require("@nestjs/common");
 let TokenBlacklistService = class TokenBlacklistService {
     constructor() {
-        this.blacklistedTokens = new Set();
+        this.blacklistedTokens = new Map();
     }
     addToBlacklist(token) {
-        this.blacklistedTokens.add(token);
+        try {
+            const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+            const exp = payload.exp * 1000;
+            this.blacklistedTokens.set(token, exp);
+        }
+        catch (error) {
+            const expiration = Date.now() + (24 * 60 * 60 * 1000);
+            this.blacklistedTokens.set(token, expiration);
+        }
     }
     isBlacklisted(token) {
-        return this.blacklistedTokens.has(token);
+        if (!this.blacklistedTokens.has(token)) {
+            return false;
+        }
+        const expiration = this.blacklistedTokens.get(token);
+        if (expiration && Date.now() > expiration) {
+            this.blacklistedTokens.delete(token);
+            return false;
+        }
+        return true;
     }
     clearExpiredTokens() {
+        const now = Date.now();
+        for (const [token, expiration] of this.blacklistedTokens.entries()) {
+            if (now > expiration) {
+                this.blacklistedTokens.delete(token);
+            }
+        }
+    }
+    getBlacklistSize() {
+        return this.blacklistedTokens.size;
     }
 };
 exports.TokenBlacklistService = TokenBlacklistService;

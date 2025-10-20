@@ -35,7 +35,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)({ message: 'Телефон должен быть строкой' }),
-    (0, class_validator_1.Matches)(/^\+?[1-9]\d{1,14}$/, {
+    (0, class_validator_1.Matches)(/^\+?[1-9]\d{8,14}$/, {
         message: 'Телефон должен быть в международном формате, например +79161234567'
     }),
     __metadata("design:type", String)

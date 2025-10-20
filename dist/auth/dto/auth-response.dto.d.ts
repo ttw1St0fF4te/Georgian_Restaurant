@@ -13,7 +13,11 @@ export declare class AuthResponseDto {
         email: string;
         first_name: string;
         last_name: string;
+        phone?: string;
         role: string;
         role_id: number;
+        country?: string;
+        city?: string;
+        street_address?: string;
     };
 }

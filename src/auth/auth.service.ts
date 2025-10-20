@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 import { User } from '../entities/user.entity';
 import { UserRole } from '../entities/user-role.entity';
+import { UserAddress } from '../entities/user-address.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto, JwtPayload } from './dto/auth-response.dto';
@@ -20,6 +21,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(UserRole)
     private userRoleRepository: Repository<UserRole>,
+    @InjectRepository(UserAddress)
+    private userAddressRepository: Repository<UserAddress>,
     private jwtService: JwtService,
   ) {}
 
@@ -75,6 +78,13 @@ export class AuthService {
       last_login: new Date(),
     });
 
+    // Получаем адрес пользователя
+    const userAddress = await this.userAddressRepository.findOne({
+      where: { user_id: user.user_id },
+      order: { created_at: 'DESC' },
+      select: ['country', 'city', 'street_address'],
+    });
+
     const payload: JwtPayload = {
       sub: user.user_id,
       username: user.username,
@@ -91,13 +101,19 @@ export class AuthService {
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
+        phone: user.phone,
         role: userRole.role_name,
         role_id: user.role_id,
+        // Добавляем данные адреса
+        country: userAddress?.country || null,
+        city: userAddress?.city || null,
+        street_address: userAddress?.street_address || null,
       },
     };
   }
 
   async getProfile(userId: string): Promise<any> {
+    // Получаем пользователя с ролью
     const user = await this.userRepository.findOne({
       where: { user_id: userId },
       relations: ['role'],
@@ -118,14 +134,38 @@ export class AuthService {
       throw new UnauthorizedException('Пользователь не найден');
     }
 
+    // Получаем роль пользователя
     const userRole = await this.userRoleRepository.findOne({
       where: { role_id: user.role_id },
     });
 
-    return {
-      ...user,
+    // Получаем адрес пользователя из таблицы user_addresses
+    const userAddress = await this.userAddressRepository.findOne({
+      where: { user_id: userId },
+      order: { created_at: 'DESC' },
+      select: ['country', 'city', 'street_address'],
+    });
+
+    // Формируем полный профиль пользователя
+    const profile = {
+      user_id: user.user_id,
+      username: user.username,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      phone: user.phone,
+      role_id: user.role_id,
       role: userRole?.role_name || 'guest',
+      created_at: user.created_at,
+      last_login: user.last_login,
+      // Добавляем данные адреса если они есть
+      country: userAddress?.country || null,
+      city: userAddress?.city || null,
+      street_address: userAddress?.street_address || null,
     };
+
+    console.log('📋 Полный профиль пользователя:', profile);
+    return profile;
   }
 
   async register(registerDto: RegisterDto): Promise<RegisterResponseDto> {
@@ -260,7 +300,7 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Пользователь не найден');
 
     const match = await bcrypt.compare(dto.current_password, user.password_hash);
-    if (!match) throw new UnauthorizedException('Текущий пароль неверный');
+    if (!match) throw new BadRequestException('Текущий пароль неверный');
 
     const saltRounds = 12;
     const newHash = await bcrypt.hash(dto.new_password, saltRounds);

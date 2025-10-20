@@ -111,11 +111,14 @@ export class AuthController {
         email: { type: 'string', example: 'test@example.com' },
         first_name: { type: 'string', example: 'John' },
         last_name: { type: 'string', example: 'Doe' },
-        phone: { type: 'string', example: '+1234567890', nullable: true },
+        phone: { type: 'string', example: '+995591234567', nullable: true },
         role_id: { type: 'number', example: 3 },
         role: { type: 'string', example: 'user' },
         created_at: { type: 'string', format: 'date-time' },
-        last_login: { type: 'string', format: 'date-time', nullable: true }
+        last_login: { type: 'string', format: 'date-time', nullable: true },
+        country: { type: 'string', example: 'Грузия', nullable: true },
+        city: { type: 'string', example: 'Тбилиси', nullable: true },
+        street_address: { type: 'string', example: 'ул. Руставели 15', nullable: true }
       }
     }
   })
@@ -190,7 +193,17 @@ export class AuthController {
   })
   async changePassword(@Request() req, @Body() dto: ChangePasswordDto) {
     const userId = req.user.userId;
-    return this.authService.changePassword(userId, dto);
+    
+    // Сначала меняем пароль
+    const result = await this.authService.changePassword(userId, dto);
+    
+    // После успешной смены пароля добавляем текущий токен в blacklist
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (token) {
+      this.tokenBlacklistService.addToBlacklist(token);
+    }
+    
+    return result;
   }
 
   @Post('logout')

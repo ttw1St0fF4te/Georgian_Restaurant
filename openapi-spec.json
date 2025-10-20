@@ -552,7 +552,7 @@
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+1234567890",
+                      "example": "+995591234567",
                       "nullable": true
                     },
                     "role_id": {
@@ -570,6 +570,21 @@
                     "last_login": {
                       "type": "string",
                       "format": "date-time",
+                      "nullable": true
+                    },
+                    "country": {
+                      "type": "string",
+                      "example": "Грузия",
+                      "nullable": true
+                    },
+                    "city": {
+                      "type": "string",
+                      "example": "Тбилиси",
+                      "nullable": true
+                    },
+                    "street_address": {
+                      "type": "string",
+                      "example": "ул. Руставели 15",
                       "nullable": true
                     }
                   }
@@ -1916,8 +1931,12 @@
               "email": "admin@georgian-restaurant.ge",
               "first_name": "Тенгиз",
               "last_name": "Админидзе",
+              "phone": "+995591234567",
               "role": "admin",
-              "role_id": 1
+              "role_id": 1,
+              "country": "Грузия",
+              "city": "Тбилиси",
+              "street_address": "ул. Руставели 15"
             }
           }
         },
