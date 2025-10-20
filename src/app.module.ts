@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { MenuCategoriesModule } from './menu-categories/menu-categories.module';
 import { MenuModule } from './menu/menu.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { CartModule } from './cart/cart.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalJwtAuthGuard } from './auth/guards/global-jwt-auth.guard';
@@ -26,6 +27,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     MenuCategoriesModule,
     MenuModule,
     RestaurantsModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [

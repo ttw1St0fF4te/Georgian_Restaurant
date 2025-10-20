@@ -17,6 +17,7 @@ const auth_module_1 = require("./auth/auth.module");
 const menu_categories_module_1 = require("./menu-categories/menu-categories.module");
 const menu_module_1 = require("./menu/menu.module");
 const restaurants_module_1 = require("./restaurants/restaurants.module");
+const cart_module_1 = require("./cart/cart.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const global_jwt_auth_guard_1 = require("./auth/guards/global-jwt-auth.guard");
@@ -38,6 +39,7 @@ exports.AppModule = AppModule = __decorate([
             menu_categories_module_1.MenuCategoriesModule,
             menu_module_1.MenuModule,
             restaurants_module_1.RestaurantsModule,
+            cart_module_1.CartModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

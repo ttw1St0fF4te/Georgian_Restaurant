@@ -1830,6 +1830,207 @@
           "Restaurants"
         ]
       }
+    },
+    "/cart": {
+      "get": {
+        "description": "Возвращает текущую корзину пользователя со всеми товарами или создает новую пустую корзину",
+        "operationId": "CartController_getCart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Корзина успешно получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить корзину пользователя",
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/cart/add": {
+      "post": {
+        "description": "Добавляет указанное количество блюда в корзину. Если блюдо уже есть в корзине, увеличивает его количество.",
+        "operationId": "CartController_addToCart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddToCartDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Товар успешно добавлен в корзину",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректные данные или превышено максимальное количество товара"
+          },
+          "404": {
+            "description": "Блюдо не найдено или недоступно"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Добавить товар в корзину",
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/cart/item/{itemId}": {
+      "put": {
+        "description": "Изменяет количество указанного блюда в корзине. Если количество равно 0, товар удаляется из корзины.",
+        "operationId": "CartController_updateCartItem",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "description": "ID блюда в меню",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCartItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Количество товара успешно обновлено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Некорректное количество"
+          },
+          "404": {
+            "description": "Товар не найден в корзине"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Обновить количество товара в корзине",
+        "tags": [
+          "Cart"
+        ]
+      },
+      "delete": {
+        "description": "Полностью удаляет указанное блюдо из корзины, независимо от количества",
+        "operationId": "CartController_removeFromCart",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "description": "ID блюда в меню",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Товар успешно удален из корзины",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Товар не найден в корзине"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Удалить товар из корзины",
+        "tags": [
+          "Cart"
+        ]
+      }
+    },
+    "/cart/clear": {
+      "delete": {
+        "description": "Удаляет все товары из корзины пользователя и саму корзину",
+        "operationId": "CartController_clearCart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Корзина успешно очищена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Корзина успешно очищена"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Очистить корзину полностью",
+        "tags": [
+          "Cart"
+        ]
+      }
     }
   },
   "info": {
@@ -2570,6 +2771,176 @@
             "maximum": 5
           }
         }
+      },
+      "CartItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "cart_item_id": {
+            "type": "number",
+            "description": "ID элемента корзины",
+            "example": 1
+          },
+          "item_id": {
+            "type": "number",
+            "description": "ID блюда",
+            "example": 1
+          },
+          "item_name": {
+            "type": "string",
+            "description": "Название блюда",
+            "example": "Хачапури по-аджарски"
+          },
+          "item_description": {
+            "type": "string",
+            "description": "Описание блюда",
+            "example": "Традиционная лодочка из теста с сыром, маслом и яйцом"
+          },
+          "unit_price": {
+            "type": "number",
+            "description": "Цена за единицу",
+            "example": 18.5
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Количество в корзине",
+            "example": 2
+          },
+          "total_price": {
+            "type": "number",
+            "description": "Общая стоимость позиции (цена * количество)",
+            "example": 37
+          },
+          "added_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Время добавления в корзину",
+            "example": "2024-10-20T10:30:00.000Z"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL изображения блюда (может быть null)",
+            "example": "https://example.com/khachapuri.jpg",
+            "nullable": true
+          },
+          "category_name": {
+            "type": "string",
+            "description": "Категория блюда",
+            "example": "Горячие блюда"
+          },
+          "is_vegetarian": {
+            "type": "boolean",
+            "description": "Вегетарианское блюдо",
+            "example": true
+          },
+          "is_spicy": {
+            "type": "boolean",
+            "description": "Острое блюдо",
+            "example": false
+          }
+        },
+        "required": [
+          "cart_item_id",
+          "item_id",
+          "item_name",
+          "item_description",
+          "unit_price",
+          "quantity",
+          "total_price",
+          "added_at",
+          "image_url",
+          "category_name",
+          "is_vegetarian",
+          "is_spicy"
+        ]
+      },
+      "CartResponseDto": {
+        "type": "object",
+        "properties": {
+          "cart_id": {
+            "type": "string",
+            "description": "ID корзины",
+            "example": "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID пользователя",
+            "example": "f1e2d3c4-b5a6-9h8g-7j6i-5k4l3m2n1o0p"
+          },
+          "items": {
+            "description": "Список товаров в корзине",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CartItemResponseDto"
+            }
+          },
+          "total_items": {
+            "type": "number",
+            "description": "Общее количество единиц товаров в корзине",
+            "example": 5
+          },
+          "total_amount": {
+            "type": "number",
+            "description": "Общая стоимость корзины",
+            "example": 87.5
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Время создания корзины",
+            "example": "2024-10-20T09:00:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Время последнего обновления корзины",
+            "example": "2024-10-20T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "cart_id",
+          "user_id",
+          "items",
+          "total_items",
+          "total_amount",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AddToCartDto": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "number",
+            "description": "ID блюда из меню",
+            "example": 1
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Количество блюд для добавления в корзину (1-10)",
+            "example": 2,
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "item_id",
+          "quantity"
+        ]
+      },
+      "UpdateCartItemDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "Новое количество блюда в корзине (1-10). Если указать 0, блюдо будет удалено из корзины",
+            "example": 3,
+            "minimum": 0,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "quantity"
+        ]
       }
     }
   }
