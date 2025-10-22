@@ -199,4 +199,39 @@ export class RestaurantsController {
   async activate(@Param('id', ParseIntPipe) id: number): Promise<RestaurantResponseDto> {
     return this.restaurantsService.activate(id);
   }
+
+  @Get(':id/tables')
+  @Public() // Доступно всем для просмотра столиков ресторана
+  @ApiOperation({
+    summary: 'Получить столики ресторана',
+    description: 'Возвращает список всех столиков указанного ресторана с информацией о вместимости',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Уникальный идентификатор ресторана',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Список столиков ресторана',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          table_id: { type: 'number', example: 1 },
+          table_number: { type: 'number', example: 5 },
+          seats_count: { type: 'number', example: 4 },
+          is_available: { type: 'boolean', example: true },
+          restaurant_id: { type: 'number', example: 1 },
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Ресторан с указанным ID не найден',
+  })
+  async getRestaurantTables(@Param('id', ParseIntPipe) id: number) {
+    return this.restaurantsService.getRestaurantTables(id);
+  }
 }

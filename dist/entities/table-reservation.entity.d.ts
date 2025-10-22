@@ -1,6 +1,7 @@
 export declare enum ReservationStatus {
     UNCONFIRMED = "unconfirmed",
     CONFIRMED = "confirmed",
+    STARTED = "started",
     COMPLETED = "completed",
     CANCELLED = "cancelled"
 }

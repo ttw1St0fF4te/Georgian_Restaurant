@@ -12,4 +12,5 @@ export declare class RestaurantsController {
     }>;
     deactivate(id: number): Promise<RestaurantResponseDto>;
     activate(id: number): Promise<RestaurantResponseDto>;
+    getRestaurantTables(id: number): Promise<any[]>;
 }

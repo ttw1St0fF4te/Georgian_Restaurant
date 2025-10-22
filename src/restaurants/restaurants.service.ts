@@ -186,4 +186,24 @@ export class RestaurantsService {
       average_rating: Number(average_rating.toFixed(2)),
     };
   }
+
+  async getRestaurantTables(restaurantId: number) {
+    // Сначала проверяем существование ресторана
+    const restaurant = await this.restaurantRepository.findOne({
+      where: { restaurant_id: restaurantId },
+    });
+
+    if (!restaurant) {
+      throw new NotFoundException(`Restaurant with ID ${restaurantId} not found`);
+    }
+
+    // Получаем столики ресторана, отсортированные по номеру стола
+    const tables = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoinAndSelect('restaurant.tables', 'tables')
+      .where('restaurant.restaurant_id = :restaurantId', { restaurantId })
+      .getOne();
+
+    return tables?.tables?.sort((a, b) => a.table_number - b.table_number) || [];
+  }
 }

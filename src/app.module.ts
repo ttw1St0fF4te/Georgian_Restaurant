@@ -10,6 +10,7 @@ import { MenuModule } from './menu/menu.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { ReservationsModule } from './reservations/reservations.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalJwtAuthGuard } from './auth/guards/global-jwt-auth.guard';
@@ -30,6 +31,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     RestaurantsModule,
     CartModule,
     ReviewsModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -13,4 +13,5 @@ export declare class RestaurantsService {
     activate(id: number): Promise<Restaurant>;
     private applyFilters;
     private calculateRestaurantStats;
+    getRestaurantTables(restaurantId: number): Promise<any[]>;
 }

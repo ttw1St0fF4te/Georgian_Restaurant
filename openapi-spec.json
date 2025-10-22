@@ -1831,6 +1831,68 @@
         ]
       }
     },
+    "/restaurants/{id}/tables": {
+      "get": {
+        "description": "Возвращает список всех столиков указанного ресторана с информацией о вместимости",
+        "operationId": "RestaurantsController_getRestaurantTables",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Уникальный идентификатор ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список столиков ресторана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "table_id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "table_number": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "seats_count": {
+                        "type": "number",
+                        "example": 4
+                      },
+                      "is_available": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "restaurant_id": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресторан с указанным ID не найден"
+          }
+        },
+        "summary": "Получить столики ресторана",
+        "tags": [
+          "Restaurants"
+        ]
+      }
+    },
     "/cart": {
       "get": {
         "description": "Возвращает текущую корзину пользователя со всеми товарами или создает новую пустую корзину",
@@ -2829,6 +2891,522 @@
         "summary": "Toggle review for a restaurant (create or delete)",
         "tags": [
           "reviews"
+        ]
+      }
+    },
+    "/reservations": {
+      "post": {
+        "description": "\n    Создает новое бронирование столика с проверкой всех бизнес-правил:\n    - Один пользователь может иметь только одно активное бронирование\n    - Столик должен принадлежать выбранному ресторану\n    - Количество гостей не должно превышать вместимость столика\n    - Бронирование возможно только в рабочие часы ресторана\n    - Нельзя забронировать занятое время\n    - Бронирование доступно с текущей даты на месяц вперед\n    - Продолжительность от 1 до 8 часов\n    ",
+        "operationId": "ReservationsController_createReservation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Бронирование успешно создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные или нарушение бизнес-правил",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Количество гостей превышает вместимость столика"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Неавторизованный доступ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 401
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ресторан или столик не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Столик не найден или не принадлежит выбранному ресторану"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Конфликт бронирования",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 409
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "У вас уже есть активное бронирование"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Conflict"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Создать новое бронирование столика",
+        "tags": [
+          "reservations"
+        ]
+      },
+      "get": {
+        "description": "Возвращает список всех бронирований в системе (только для админов и менеджеров)",
+        "operationId": "ReservationsController_getAllReservations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список всех бронирований",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить все бронирования",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/active": {
+      "get": {
+        "description": "Возвращает список активных бронирований (unconfirmed, confirmed, started)",
+        "operationId": "ReservationsController_getActiveReservations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список активных бронирований",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить все активные бронирования",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/inactive": {
+      "get": {
+        "description": "Возвращает список завершенных и отмененных бронирований",
+        "operationId": "ReservationsController_getInactiveReservations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список неактивных бронирований",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить все неактивные бронирования",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/availability/{restaurantId}/{tableId}": {
+      "get": {
+        "description": "Возвращает активные бронирования и занятые временные слоты для конкретного столика на выбранную дату",
+        "operationId": "ReservationsController_getTableAvailability",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "description": "ID ресторана",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "tableId",
+            "required": true,
+            "in": "path",
+            "description": "ID столика",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "description": "Дата для проверки доступности (YYYY-MM-DD)",
+            "schema": {
+              "example": "2025-10-25",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информация о доступности столика",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestaurantTableAvailabilityDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить доступность столика на определенную дату",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/my": {
+      "get": {
+        "description": "Возвращает все бронирования авторизованного пользователя",
+        "operationId": "ReservationsController_getUserReservations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список бронирований пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить бронирования текущего пользователя",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/my/active": {
+      "get": {
+        "description": "Возвращает активные бронирования авторизованного пользователя",
+        "operationId": "ReservationsController_getUserActiveReservations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список активных бронирований пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить активные бронирования текущего пользователя",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/{reservationId}/confirm": {
+      "patch": {
+        "description": "\n    Подтверждает бронирование пользователя. Возможно только для бронирований со статусом 'unconfirmed'.\n    При подтверждении статус меняется на 'confirmed' и устанавливается время подтверждения.\n    ",
+        "operationId": "ReservationsController_confirmReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "required": true,
+            "in": "path",
+            "description": "ID бронирования для подтверждения",
+            "schema": {
+              "example": "uuid-string",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Бронирование успешно подтверждено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Нельзя подтвердить бронирование с текущим статусом",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Можно подтвердить только неподтвержденные бронирования. Текущий статус: confirmed"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Бронирование не найдено или не принадлежит пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Бронирование не найдено или не принадлежит вам"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Подтвердить бронирование",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/{reservationId}/cancel": {
+      "patch": {
+        "description": "\n    Отменяет бронирование пользователя. Возможно только для бронирований со статусом 'unconfirmed'.\n    При отмене статус меняется на 'cancelled'.\n    ",
+        "operationId": "ReservationsController_cancelReservation",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "required": true,
+            "in": "path",
+            "description": "ID бронирования для отмены",
+            "schema": {
+              "example": "uuid-string",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Бронирование успешно отменено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Нельзя отменить бронирование с текущим статусом",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Можно отменить только неподтвержденные бронирования. Текущий статус: confirmed"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Бронирование не найдено или не принадлежит пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Бронирование не найдено или не принадлежит вам"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Отменить бронирование",
+        "tags": [
+          "reservations"
         ]
       }
     }
@@ -3954,6 +4532,218 @@
             "minLength": 10
           }
         }
+      },
+      "CreateReservationDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_id": {
+            "type": "number",
+            "description": "ID ресторана для бронирования",
+            "example": 1
+          },
+          "table_id": {
+            "type": "number",
+            "description": "ID столика для бронирования",
+            "example": 1
+          },
+          "reservation_date": {
+            "type": "string",
+            "description": "Дата бронирования (YYYY-MM-DD)",
+            "example": "2025-10-25"
+          },
+          "reservation_time": {
+            "type": "string",
+            "description": "Время начала бронирования (HH:MM)",
+            "example": "18:00"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Продолжительность бронирования в часах (1-8)",
+            "example": 2,
+            "minimum": 1,
+            "maximum": 8
+          },
+          "guests_count": {
+            "type": "number",
+            "description": "Количество гостей",
+            "example": 4,
+            "minimum": 1
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Контактный телефон",
+            "example": "+995555123456"
+          }
+        },
+        "required": [
+          "restaurant_id",
+          "table_id",
+          "reservation_date",
+          "reservation_time",
+          "duration_hours",
+          "guests_count",
+          "contact_phone"
+        ]
+      },
+      "ReservationResponseDto": {
+        "type": "object",
+        "properties": {
+          "reservation_id": {
+            "type": "string",
+            "description": "ID бронирования",
+            "example": "b42bb960-ff62-4ca6-8e9d-c47ce9470ed6"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID пользователя",
+            "example": "a32cc850-ee52-3ba6-7d8c-b47ce9470ed5"
+          },
+          "restaurant_id": {
+            "type": "number",
+            "description": "ID ресторана",
+            "example": 1
+          },
+          "restaurant_name": {
+            "type": "string",
+            "description": "Название ресторана",
+            "example": "Тбилисо"
+          },
+          "table_id": {
+            "type": "number",
+            "description": "ID столика",
+            "example": 1
+          },
+          "table_number": {
+            "type": "number",
+            "description": "Номер столика",
+            "example": 5
+          },
+          "seats_count": {
+            "type": "number",
+            "description": "Количество мест за столиком",
+            "example": 4
+          },
+          "reservation_date": {
+            "type": "string",
+            "description": "Дата бронирования",
+            "example": "2025-10-25"
+          },
+          "reservation_time": {
+            "type": "string",
+            "description": "Время начала бронирования",
+            "example": "18:00:00"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Продолжительность в часах",
+            "example": 2
+          },
+          "guests_count": {
+            "type": "number",
+            "description": "Количество гостей",
+            "example": 4
+          },
+          "reservation_status": {
+            "type": "string",
+            "description": "Статус бронирования",
+            "enum": [
+              "unconfirmed",
+              "confirmed",
+              "started",
+              "completed",
+              "cancelled"
+            ],
+            "example": "unconfirmed"
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Контактный телефон",
+            "example": "+995555123456"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания бронирования",
+            "example": "2025-10-22T15:30:00.000Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2025-10-22T15:30:00.000Z"
+          },
+          "confirmed_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата подтверждения бронирования (если подтверждена)",
+            "example": "2025-10-22T16:00:00.000Z"
+          }
+        },
+        "required": [
+          "reservation_id",
+          "user_id",
+          "restaurant_id",
+          "restaurant_name",
+          "table_id",
+          "table_number",
+          "seats_count",
+          "reservation_date",
+          "reservation_time",
+          "duration_hours",
+          "guests_count",
+          "reservation_status",
+          "contact_phone",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "OccupiedTimeSlotDto": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "description": "Время начала занятого слота",
+            "example": "18:00"
+          },
+          "end": {
+            "type": "string",
+            "description": "Время окончания занятого слота",
+            "example": "20:00"
+          },
+          "reservation_id": {
+            "type": "string",
+            "description": "ID бронирования, занимающего этот слот",
+            "example": "b42bb960-ff62-4ca6-8e9d-c47ce9470ed6"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "reservation_id"
+        ]
+      },
+      "RestaurantTableAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "reservations": {
+            "description": "Список активных бронирований для данного столика на выбранную дату",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationResponseDto"
+            }
+          },
+          "occupiedTimeSlots": {
+            "description": "Список занятых временных слотов",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OccupiedTimeSlotDto"
+            }
+          }
+        },
+        "required": [
+          "reservations",
+          "occupiedTimeSlots"
+        ]
       }
     }
   }

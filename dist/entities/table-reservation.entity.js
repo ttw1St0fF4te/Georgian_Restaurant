@@ -15,6 +15,7 @@ var ReservationStatus;
 (function (ReservationStatus) {
     ReservationStatus["UNCONFIRMED"] = "unconfirmed";
     ReservationStatus["CONFIRMED"] = "confirmed";
+    ReservationStatus["STARTED"] = "started";
     ReservationStatus["COMPLETED"] = "completed";
     ReservationStatus["CANCELLED"] = "cancelled";
 })(ReservationStatus || (exports.ReservationStatus = ReservationStatus = {}));

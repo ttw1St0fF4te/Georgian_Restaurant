@@ -45,6 +45,9 @@ let RestaurantsController = class RestaurantsController {
     async activate(id) {
         return this.restaurantsService.activate(id);
     }
+    async getRestaurantTables(id) {
+        return this.restaurantsService.getRestaurantTables(id);
+    }
 };
 exports.RestaurantsController = RestaurantsController;
 __decorate([
@@ -224,6 +227,43 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], RestaurantsController.prototype, "activate", null);
+__decorate([
+    (0, common_1.Get)(':id/tables'),
+    (0, public_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Получить столики ресторана',
+        description: 'Возвращает список всех столиков указанного ресторана с информацией о вместимости',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Уникальный идентификатор ресторана',
+        example: 1,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Список столиков ресторана',
+        schema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    table_id: { type: 'number', example: 1 },
+                    table_number: { type: 'number', example: 5 },
+                    seats_count: { type: 'number', example: 4 },
+                    is_available: { type: 'boolean', example: true },
+                    restaurant_id: { type: 'number', example: 1 },
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({
+        description: 'Ресторан с указанным ID не найден',
+    }),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], RestaurantsController.prototype, "getRestaurantTables", null);
 exports.RestaurantsController = RestaurantsController = __decorate([
     (0, swagger_1.ApiTags)('Restaurants'),
     (0, common_1.Controller)('restaurants'),

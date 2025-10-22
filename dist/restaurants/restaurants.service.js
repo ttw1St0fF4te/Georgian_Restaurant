@@ -133,6 +133,20 @@ let RestaurantsService = class RestaurantsService {
             average_rating: Number(average_rating.toFixed(2)),
         };
     }
+    async getRestaurantTables(restaurantId) {
+        const restaurant = await this.restaurantRepository.findOne({
+            where: { restaurant_id: restaurantId },
+        });
+        if (!restaurant) {
+            throw new common_1.NotFoundException(`Restaurant with ID ${restaurantId} not found`);
+        }
+        const tables = await this.restaurantRepository
+            .createQueryBuilder('restaurant')
+            .leftJoinAndSelect('restaurant.tables', 'tables')
+            .where('restaurant.restaurant_id = :restaurantId', { restaurantId })
+            .getOne();
+        return tables?.tables?.sort((a, b) => a.table_number - b.table_number) || [];
+    }
 };
 exports.RestaurantsService = RestaurantsService;
 exports.RestaurantsService = RestaurantsService = __decorate([
