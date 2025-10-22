@@ -5,6 +5,9 @@ import { AppModule } from './app.module';
 import * as fs from 'fs';
 
 async function bootstrap() {
+  // Устанавливаем часовой пояс для всего приложения
+  process.env.TZ = process.env.TZ || 'Europe/Moscow';
+  
   const app = await NestFactory.create(AppModule);
 
   // Global validation pipe

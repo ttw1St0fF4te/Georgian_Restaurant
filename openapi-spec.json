@@ -2031,6 +2031,806 @@
           "Cart"
         ]
       }
+    },
+    "/reviews": {
+      "post": {
+        "operationId": "ReviewsController_createReview",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "404": {
+            "description": "Restaurant not found"
+          },
+          "409": {
+            "description": "Review already exists for this restaurant"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new review",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "get": {
+        "operationId": "ReviewsController_getReviews",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by restaurant ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by minimum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by maximum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field",
+            "schema": {
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "example": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviews retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedReviewsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get all reviews with filtering and pagination",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/restaurant/{restaurantId}": {
+      "get": {
+        "operationId": "ReviewsController_getRestaurantReviews",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by restaurant ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by minimum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by maximum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field",
+            "schema": {
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "example": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant reviews retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedReviewsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found"
+          }
+        },
+        "summary": "Get reviews for a specific restaurant",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/restaurant/{restaurantId}/stats": {
+      "get": {
+        "operationId": "ReviewsController_getRestaurantReviewStats",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant review statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewStatsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found"
+          }
+        },
+        "summary": "Get review statistics for a restaurant",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/user/{userId}": {
+      "get": {
+        "operationId": "ReviewsController_getUserReviews",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by restaurant ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by minimum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by maximum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field",
+            "schema": {
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "example": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User reviews retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedReviewsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get reviews by a specific user (Admin/Manager only)",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/my": {
+      "get": {
+        "operationId": "ReviewsController_getMyReviews",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by restaurant ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user ID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "minRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by minimum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 3,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxRating",
+            "required": false,
+            "in": "query",
+            "description": "Filter by maximum rating",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "example": 5,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort by field",
+            "schema": {
+              "example": "created_at",
+              "type": "string",
+              "enum": [
+                "created_at",
+                "rating",
+                "updated_at"
+              ]
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order",
+            "schema": {
+              "example": "DESC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (1-based)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User reviews retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedReviewsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user reviews",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/{id}": {
+      "get": {
+        "operationId": "ReviewsController_getReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "summary": "Get review by ID",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "put": {
+        "operationId": "ReviewsController_updateReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "403": {
+            "description": "Access denied - Admin only"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a review (Admin only)",
+        "tags": [
+          "reviews"
+        ]
+      },
+      "delete": {
+        "operationId": "ReviewsController_deleteReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted successfully"
+          },
+          "403": {
+            "description": "Access denied - not review owner"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a review",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/restaurant/{restaurantId}/my": {
+      "delete": {
+        "operationId": "ReviewsController_deleteMyRestaurantReview",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted successfully"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete current user review for a restaurant",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/restaurant/{restaurantId}/toggle": {
+      "post": {
+        "operationId": "ReviewsController_toggleRestaurantReview",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Review toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Toggle review for a restaurant (create or delete)",
+        "tags": [
+          "reviews"
+        ]
+      }
     }
   },
   "info": {
@@ -2941,6 +3741,219 @@
         "required": [
           "quantity"
         ]
+      },
+      "CreateReviewDto": {
+        "type": "object",
+        "properties": {
+          "restaurant_id": {
+            "type": "number",
+            "description": "ID ресторана",
+            "example": 1
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг от 1 до 5",
+            "example": 5,
+            "minimum": 1,
+            "maximum": 5
+          },
+          "review_text": {
+            "type": "string",
+            "description": "Текст отзыва (минимум 10 символов)",
+            "example": "Отличный ресторан с прекрасной кухней и обслуживанием!",
+            "minLength": 10
+          }
+        },
+        "required": [
+          "restaurant_id",
+          "rating"
+        ]
+      },
+      "ReviewResponseDto": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "description": "ID отзыва",
+            "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID пользователя",
+            "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+          },
+          "restaurant_id": {
+            "type": "number",
+            "description": "ID ресторана",
+            "example": 1
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг от 1 до 5",
+            "example": 5
+          },
+          "review_text": {
+            "type": "string",
+            "description": "Текст отзыва",
+            "example": "Отличный ресторан с прекрасной кухней и обслуживанием!"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата обновления",
+            "example": "2024-01-15T15:45:00Z"
+          },
+          "user": {
+            "type": "object",
+            "description": "Информация о пользователе",
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+              },
+              "username": {
+                "type": "string",
+                "example": "john_doe"
+              },
+              "first_name": {
+                "type": "string",
+                "example": "John"
+              },
+              "last_name": {
+                "type": "string",
+                "example": "Doe"
+              }
+            }
+          }
+        },
+        "required": [
+          "review_id",
+          "user_id",
+          "restaurant_id",
+          "rating",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "PaginatedReviewsDto": {
+        "type": "object",
+        "properties": {
+          "reviews": {
+            "description": "List of reviews",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewResponseDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total number of reviews",
+            "example": 150
+          },
+          "page": {
+            "type": "number",
+            "description": "Current page number",
+            "example": 1
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of items per page",
+            "example": 10
+          },
+          "totalPages": {
+            "type": "number",
+            "description": "Total number of pages",
+            "example": 15
+          },
+          "hasNext": {
+            "type": "boolean",
+            "description": "Whether there is a next page",
+            "example": true
+          },
+          "hasPrev": {
+            "type": "boolean",
+            "description": "Whether there is a previous page",
+            "example": false
+          }
+        },
+        "required": [
+          "reviews",
+          "total",
+          "page",
+          "limit",
+          "totalPages",
+          "hasNext",
+          "hasPrev"
+        ]
+      },
+      "ReviewStatsDto": {
+        "type": "object",
+        "properties": {
+          "restaurantId": {
+            "type": "number",
+            "description": "Restaurant ID",
+            "example": 1
+          },
+          "totalReviews": {
+            "type": "number",
+            "description": "Total number of reviews",
+            "example": 125
+          },
+          "averageRating": {
+            "type": "number",
+            "description": "Average rating",
+            "example": 4.3
+          },
+          "ratingDistribution": {
+            "type": "object",
+            "description": "Rating distribution",
+            "example": {
+              "1": 5,
+              "2": 10,
+              "3": 20,
+              "4": 45,
+              "5": 45
+            }
+          },
+          "recentReviews": {
+            "description": "Most recent reviews",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewResponseDto"
+            }
+          }
+        },
+        "required": [
+          "restaurantId",
+          "totalReviews",
+          "averageRating",
+          "ratingDistribution",
+          "recentReviews"
+        ]
+      },
+      "UpdateReviewDto": {
+        "type": "object",
+        "properties": {
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг от 1 до 5",
+            "example": 4,
+            "minimum": 1,
+            "maximum": 5
+          },
+          "review_text": {
+            "type": "string",
+            "description": "Текст отзыва (минимум 10 символов)",
+            "example": "Обновленный отзыв о ресторане",
+            "minLength": 10
+          }
+        }
       }
     }
   }

@@ -28,6 +28,9 @@ let DatabaseConfig = class DatabaseConfig {
             synchronize: false,
             logging: this.configService.get('NODE_ENV') === 'development',
             ssl: this.configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+            extra: {
+                timezone: 'Europe/Moscow',
+            },
         };
     }
 };

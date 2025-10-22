@@ -18,6 +18,9 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       synchronize: false, // Отключено для production, используем миграции
       logging: this.configService.get<string>('NODE_ENV') === 'development',
       ssl: this.configService.get<string>('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+      extra: {
+        timezone: 'Europe/Moscow',
+      },
     };
   }
 }
