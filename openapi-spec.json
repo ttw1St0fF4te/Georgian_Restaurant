@@ -3409,6 +3409,236 @@
           "reservations"
         ]
       }
+    },
+    "/orders": {
+      "post": {
+        "description": "\n    Создает заказ на основе содержимого корзины пользователя.\n    \n    Типы заказов:\n    - delivery: Доставка на дом (требуется адрес доставки, взимается fee 5%)\n    - dine_in: Заказ в ресторане (требуется активное бронирование со статусом 'started')\n    \n    Валидация:\n    - Корзина не должна быть пустой\n    - Для delivery: все адресные поля обязательны, должен быть активный ресторан в городе доставки\n    - Для dine_in: reservation_id обязателен, бронирование должно быть в статусе 'started'\n    - После создания заказа корзина очищается\n    ",
+        "operationId": "OrdersController_createOrder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Заказ успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные или нарушение бизнес-правил",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Корзина пуста"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Корзина или бронирование не найдено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Корзина пользователя не найдена"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Not Found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Создать заказ из корзины",
+        "tags": [
+          "orders"
+        ]
+      },
+      "get": {
+        "description": "Возвращает все заказы в системе (только для админов и менеджеров)",
+        "operationId": "OrdersController_getAllOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список всех заказов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить все заказы",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/orders/my": {
+      "get": {
+        "description": "Возвращает все заказы авторизованного пользователя",
+        "operationId": "OrdersController_getUserOrders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список заказов пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить заказы текущего пользователя",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/orders/my/address": {
+      "get": {
+        "description": "Возвращает адрес пользователя для автозаполнения при создании заказа с доставкой",
+        "operationId": "OrdersController_getUserAddress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Адрес пользователя",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "country": {
+                      "type": "string",
+                      "example": "Грузия"
+                    },
+                    "city": {
+                      "type": "string",
+                      "example": "Тбилиси"
+                    },
+                    "street_address": {
+                      "type": "string",
+                      "example": "ул. Руставели, 15"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить адрес пользователя для автозаполнения",
+        "tags": [
+          "orders"
+        ]
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "description": "Возвращает детальную информацию о заказе",
+        "operationId": "OrdersController_getOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "description": "ID заказа",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Информация о заказе",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Заказ не найден"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить заказ по ID",
+        "tags": [
+          "orders"
+        ]
+      }
     }
   },
   "info": {
@@ -4743,6 +4973,184 @@
         "required": [
           "reservations",
           "occupiedTimeSlots"
+        ]
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "order_type": {
+            "type": "string",
+            "description": "Тип заказа",
+            "enum": [
+              "delivery",
+              "dine_in"
+            ],
+            "example": "delivery"
+          },
+          "delivery_country": {
+            "type": "string",
+            "description": "Страна доставки (только для delivery)",
+            "example": "Грузия"
+          },
+          "delivery_city": {
+            "type": "string",
+            "description": "Город доставки (только для delivery)",
+            "example": "Тбилиси"
+          },
+          "delivery_street_address": {
+            "type": "string",
+            "description": "Адрес доставки (только для delivery)",
+            "example": "ул. Руставели, 15, кв. 10"
+          },
+          "delivery_phone": {
+            "type": "string",
+            "description": "Телефон для доставки (только для delivery)",
+            "example": "+995555123456"
+          },
+          "reservation_id": {
+            "type": "string",
+            "description": "ID бронирования (только для dine_in)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "should_update_user_address": {
+            "type": "boolean",
+            "description": "Обновить ли адрес пользователя указанным адресом доставки",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "order_type"
+        ]
+      },
+      "OrderResponseDto": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "description": "ID заказа",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID пользователя",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "order_type": {
+            "type": "string",
+            "description": "Тип заказа",
+            "enum": [
+              "delivery",
+              "dine_in"
+            ],
+            "example": "delivery"
+          },
+          "delivery_country": {
+            "type": "string",
+            "description": "Страна доставки",
+            "example": "Грузия",
+            "nullable": true
+          },
+          "delivery_city": {
+            "type": "string",
+            "description": "Город доставки",
+            "example": "Тбилиси",
+            "nullable": true
+          },
+          "delivery_street_address": {
+            "type": "string",
+            "description": "Адрес доставки",
+            "example": "ул. Руставели, 15, кв. 10",
+            "nullable": true
+          },
+          "delivery_phone": {
+            "type": "string",
+            "description": "Телефон доставки",
+            "example": "+995555123456",
+            "nullable": true
+          },
+          "reservation_id": {
+            "type": "string",
+            "description": "ID бронирования",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "nullable": true
+          },
+          "subtotal": {
+            "type": "number",
+            "description": "Стоимость товаров",
+            "example": 45.5
+          },
+          "delivery_fee": {
+            "type": "number",
+            "description": "Стоимость доставки",
+            "example": 2.28
+          },
+          "total_amount": {
+            "type": "number",
+            "description": "Общая стоимость",
+            "example": 47.78
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата создания заказа",
+            "example": "2025-10-23T10:30:00Z"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Дата последнего обновления",
+            "example": "2025-10-23T10:30:00Z"
+          },
+          "order_items": {
+            "type": "array",
+            "description": "Позиции заказа",
+            "items": {
+              "type": "object",
+              "properties": {
+                "order_item_id": {
+                  "type": "number",
+                  "example": 1
+                },
+                "item_id": {
+                  "type": "number",
+                  "example": 5
+                },
+                "item_name": {
+                  "type": "string",
+                  "example": "Хачапури по-аджарски"
+                },
+                "quantity": {
+                  "type": "number",
+                  "example": 2
+                },
+                "unit_price": {
+                  "type": "number",
+                  "example": 18.5
+                },
+                "total_price": {
+                  "type": "number",
+                  "example": 37
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "order_id",
+          "user_id",
+          "order_type",
+          "delivery_country",
+          "delivery_city",
+          "delivery_street_address",
+          "delivery_phone",
+          "reservation_id",
+          "subtotal",
+          "delivery_fee",
+          "total_amount",
+          "created_at",
+          "updated_at",
+          "order_items"
         ]
       }
     }

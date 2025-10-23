@@ -6,7 +6,9 @@ export declare class Order {
     order_id: string;
     user_id: string;
     order_type: OrderType;
-    delivery_address: string;
+    delivery_country: string;
+    delivery_city: string;
+    delivery_street_address: string;
     delivery_phone: string;
     reservation_id: string;
     subtotal: number;

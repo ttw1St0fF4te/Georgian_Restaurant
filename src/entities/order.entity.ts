@@ -19,12 +19,20 @@ export class Order {
   })
   order_type: OrderType;
 
+  // Поля для доставки
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  delivery_country: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  delivery_city: string;
+
   @Column({ type: 'text', nullable: true })
-  delivery_address: string;
+  delivery_street_address: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
   delivery_phone: string;
 
+  // Для ресторана (через бронь)
   @Column({ type: 'uuid', nullable: true })
   reservation_id: string;
 
