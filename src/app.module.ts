@@ -12,6 +12,7 @@ import { CartModule } from './cart/cart.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { OrdersModule } from './orders/orders.module';
+import { ReportsModule } from './reports/reports.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalJwtAuthGuard } from './auth/guards/global-jwt-auth.guard';
@@ -34,6 +35,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ReviewsModule,
     ReservationsModule,
     OrdersModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

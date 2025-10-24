@@ -4004,6 +4004,305 @@
           "orders"
         ]
       }
+    },
+    "/reports/sales": {
+      "get": {
+        "operationId": "ReportsController_getSalesByDay",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Продажи по дням"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Продажи по дням",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/occupancy": {
+      "get": {
+        "operationId": "ReportsController_getOccupancy",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Занятость столиков (количество бронирований по столикам)",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/user-visits": {
+      "get": {
+        "operationId": "ReportsController_getUserVisits",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Посещения пользователей (unique users по дням по полю last_login)",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/export/sales": {
+      "get": {
+        "operationId": "ReportsController_exportSalesCsv",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Экспорт продаж в CSV",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/export/occupancy": {
+      "get": {
+        "operationId": "ReportsController_exportOccupancyCsv",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Экспорт занятости столиков в CSV",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/export/user-visits": {
+      "get": {
+        "operationId": "ReportsController_exportUserVisitsCsv",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Экспорт активности пользователей в CSV",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/reports/export/all": {
+      "get": {
+        "operationId": "ReportsController_exportAllDataCsv",
+        "parameters": [
+          {
+            "name": "restaurantId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Экспорт всех данных в один CSV файл",
+        "tags": [
+          "reports"
+        ]
+      }
     }
   },
   "info": {
