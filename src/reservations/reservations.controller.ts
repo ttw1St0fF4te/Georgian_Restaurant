@@ -19,7 +19,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { ReservationsService } from './reservations.service';
 import { 
-  CreateReservationDto, 
+  CreateReservationDto,
+  CreateReservationForUserDto,
   ReservationResponseDto, 
   RestaurantTableAvailabilityDto 
 } from './dto';
@@ -123,6 +124,34 @@ export class ReservationsController {
   ): Promise<ReservationResponseDto> {
     const userId = req.user.userId;
     return this.reservationsService.createReservation(userId, createReservationDto);
+  }
+
+  @Post('for-user')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles('manager', 'admin')
+  @ApiOperation({
+    summary: 'Создать бронирование для пользователя (только менеджеры и администраторы)',
+    description: `
+    Создает новое бронирование для указанного пользователя. Доступно только менеджерам и администраторам.
+    Проверяет все те же бизнес-правила, что и обычное создание бронирования.
+    `,
+  })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Бронирование успешно создано',
+    type: ReservationResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Неверные данные или нарушение бизнес-правил',
+  })
+  async createReservationForUser(
+    @Body() createReservationForUserDto: CreateReservationForUserDto,
+  ): Promise<ReservationResponseDto> {
+    return this.reservationsService.createReservation(
+      createReservationForUserDto.user_id, 
+      createReservationForUserDto
+    );
   }
 
   @Get()
@@ -354,5 +383,75 @@ export class ReservationsController {
   ): Promise<ReservationResponseDto> {
     const userId = req.user.userId;
     return this.reservationsService.cancelReservation(userId, reservationId);
+  }
+
+  @Patch('manager/:reservationId/confirm')
+  @HttpCode(HttpStatus.OK)
+  @Roles('manager', 'admin')
+  @ApiOperation({
+    summary: 'Подтвердить бронирование (только для менеджеров)',
+    description: `
+    Подтверждает любое бронирование в системе. Доступно только менеджерам и администраторам.
+    Возможно только для бронирований со статусом 'unconfirmed'.
+    При подтверждении статус меняется на 'confirmed' и устанавливается время подтверждения.
+    `,
+  })
+  @ApiParam({
+    name: 'reservationId',
+    description: 'ID бронирования для подтверждения',
+    example: 'uuid-string',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Бронирование успешно подтверждено',
+    type: ReservationResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Нельзя подтвердить бронирование с текущим статусом',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Бронирование не найдено',
+  })
+  async confirmReservationForManager(
+    @Param('reservationId') reservationId: string,
+  ): Promise<ReservationResponseDto> {
+    return this.reservationsService.confirmReservationForManager(reservationId);
+  }
+
+  @Patch('manager/:reservationId/cancel')
+  @HttpCode(HttpStatus.OK)
+  @Roles('manager', 'admin')
+  @ApiOperation({
+    summary: 'Отменить бронирование (только для менеджеров)',
+    description: `
+    Отменяет любое бронирование в системе. Доступно только менеджерам и администраторам.
+    Возможно только для бронирований со статусом 'unconfirmed'.
+    При отмене статус меняется на 'cancelled'.
+    `,
+  })
+  @ApiParam({
+    name: 'reservationId',
+    description: 'ID бронирования для отмены',
+    example: 'uuid-string',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Бронирование успешно отменено',
+    type: ReservationResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Нельзя отменить бронирование с текущим статусом',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Бронирование не найдено',
+  })
+  async cancelReservationForManager(
+    @Param('reservationId') reservationId: string,
+  ): Promise<ReservationResponseDto> {
+    return this.reservationsService.cancelReservationForManager(reservationId);
   }
 }

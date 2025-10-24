@@ -206,6 +206,47 @@ export class AuthController {
     return result;
   }
 
+  @Get('users')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Получение списка всех пользователей (только для менеджеров и администраторов)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Список пользователей успешно получен',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' },
+          username: { type: 'string', example: 'testuser123' },
+          email: { type: 'string', example: 'test@example.com' },
+          first_name: { type: 'string', example: 'John' },
+          last_name: { type: 'string', example: 'Doe' },
+          phone: { type: 'string', example: '+995591234567', nullable: true },
+          role: { type: 'string', example: 'user' },
+          created_at: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Пользователь не авторизован',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
+  async getAllUsers(@Request() req) {
+    // Проверяем права доступа
+    if (req.user.role !== 'manager' && req.user.role !== 'admin') {
+      throw new BadRequestException('Недостаточно прав доступа');
+    }
+    
+    return this.authService.getAllUsers();
+  }
+
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

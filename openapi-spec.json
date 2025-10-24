@@ -719,6 +719,77 @@
         ]
       }
     },
+    "/auth/users": {
+      "get": {
+        "operationId": "AuthController_getAllUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Список пользователей успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "user_id": {
+                        "type": "string",
+                        "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "testuser123"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "test@example.com"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "example": "Doe"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+995591234567",
+                        "nullable": true
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "user"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Недостаточно прав доступа"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получение списка всех пользователей (только для менеджеров и администраторов)",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
@@ -3216,6 +3287,47 @@
         ]
       }
     },
+    "/reservations/for-user": {
+      "post": {
+        "description": "\n    Создает новое бронирование для указанного пользователя. Доступно только менеджерам и администраторам.\n    Проверяет все те же бизнес-правила, что и обычное создание бронирования.\n    ",
+        "operationId": "ReservationsController_createReservationForUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReservationForUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Бронирование успешно создано",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные или нарушение бизнес-правил"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Создать бронирование для пользователя (только менеджеры и администраторы)",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
     "/reservations/active": {
       "get": {
         "description": "Возвращает список активных бронирований (unconfirmed, confirmed, started)",
@@ -3568,6 +3680,96 @@
           }
         ],
         "summary": "Отменить бронирование",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/manager/{reservationId}/confirm": {
+      "patch": {
+        "description": "\n    Подтверждает любое бронирование в системе. Доступно только менеджерам и администраторам.\n    Возможно только для бронирований со статусом 'unconfirmed'.\n    При подтверждении статус меняется на 'confirmed' и устанавливается время подтверждения.\n    ",
+        "operationId": "ReservationsController_confirmReservationForManager",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "required": true,
+            "in": "path",
+            "description": "ID бронирования для подтверждения",
+            "schema": {
+              "example": "uuid-string",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Бронирование успешно подтверждено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Нельзя подтвердить бронирование с текущим статусом"
+          },
+          "404": {
+            "description": "Бронирование не найдено"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Подтвердить бронирование (только для менеджеров)",
+        "tags": [
+          "reservations"
+        ]
+      }
+    },
+    "/reservations/manager/{reservationId}/cancel": {
+      "patch": {
+        "description": "\n    Отменяет любое бронирование в системе. Доступно только менеджерам и администраторам.\n    Возможно только для бронирований со статусом 'unconfirmed'.\n    При отмене статус меняется на 'cancelled'.\n    ",
+        "operationId": "ReservationsController_cancelReservationForManager",
+        "parameters": [
+          {
+            "name": "reservationId",
+            "required": true,
+            "in": "path",
+            "description": "ID бронирования для отмены",
+            "schema": {
+              "example": "uuid-string",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Бронирование успешно отменено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Нельзя отменить бронирование с текущим статусом"
+          },
+          "404": {
+            "description": "Бронирование не найдено"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Отменить бронирование (только для менеджеров)",
         "tags": [
           "reservations"
         ]
@@ -5088,6 +5290,64 @@
           "contact_phone",
           "created_at",
           "updated_at"
+        ]
+      },
+      "CreateReservationForUserDto": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "ID пользователя, для которого создается бронирование",
+            "example": "a32cc850-ee52-3ba6-7d8c-b47ce9470ed5"
+          },
+          "restaurant_id": {
+            "type": "number",
+            "description": "ID ресторана для бронирования",
+            "example": 1
+          },
+          "table_id": {
+            "type": "number",
+            "description": "ID столика для бронирования",
+            "example": 1
+          },
+          "reservation_date": {
+            "type": "string",
+            "description": "Дата бронирования (YYYY-MM-DD)",
+            "example": "2025-10-25"
+          },
+          "reservation_time": {
+            "type": "string",
+            "description": "Время начала бронирования (HH:MM)",
+            "example": "18:00"
+          },
+          "duration_hours": {
+            "type": "number",
+            "description": "Продолжительность бронирования в часах (1-8)",
+            "example": 2,
+            "minimum": 1,
+            "maximum": 8
+          },
+          "guests_count": {
+            "type": "number",
+            "description": "Количество гостей",
+            "example": 4,
+            "minimum": 1
+          },
+          "contact_phone": {
+            "type": "string",
+            "description": "Контактный телефон",
+            "example": "+995555123456"
+          }
+        },
+        "required": [
+          "user_id",
+          "restaurant_id",
+          "table_id",
+          "reservation_date",
+          "reservation_time",
+          "duration_hours",
+          "guests_count",
+          "contact_phone"
         ]
       },
       "OccupiedTimeSlotDto": {

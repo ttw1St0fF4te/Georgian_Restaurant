@@ -479,6 +479,62 @@ export class ReservationsService {
     return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
   }
 
+  // Методы для менеджеров - могут работать с любыми бронированиями
+  async confirmReservationForManager(reservationId: string): Promise<ReservationResponseDto> {
+    // Проверяем, что бронирование существует
+    const reservation = await this.reservationRepository.findOne({
+      where: { reservation_id: reservationId },
+      relations: ['restaurant', 'table'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException('Бронирование не найдено');
+    }
+
+    // Проверяем, что статус позволяет подтверждение
+    if (reservation.reservation_status !== ReservationStatus.UNCONFIRMED) {
+      throw new BadRequestException(
+        `Можно подтвердить только неподтвержденные бронирования. Текущий статус: ${reservation.reservation_status}`,
+      );
+    }
+
+    // Обновляем статус и устанавливаем время подтверждения
+    reservation.reservation_status = ReservationStatus.CONFIRMED;
+    reservation.confirmed_at = new Date();
+    reservation.updated_at = new Date();
+
+    const updatedReservation = await this.reservationRepository.save(reservation);
+
+    return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
+  }
+
+  async cancelReservationForManager(reservationId: string): Promise<ReservationResponseDto> {
+    // Проверяем, что бронирование существует
+    const reservation = await this.reservationRepository.findOne({
+      where: { reservation_id: reservationId },
+      relations: ['restaurant', 'table'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException('Бронирование не найдено');
+    }
+
+    // Проверяем, что статус позволяет отмену
+    if (reservation.reservation_status !== ReservationStatus.UNCONFIRMED) {
+      throw new BadRequestException(
+        `Можно отменить только неподтвержденные бронирования. Текущий статус: ${reservation.reservation_status}`,
+      );
+    }
+
+    // Обновляем статус на отмененный
+    reservation.reservation_status = ReservationStatus.CANCELLED;
+    reservation.updated_at = new Date();
+
+    const updatedReservation = await this.reservationRepository.save(reservation);
+
+    return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
+  }
+
   private mapToResponseDto(
     reservation: TableReservation,
     restaurant: Restaurant,

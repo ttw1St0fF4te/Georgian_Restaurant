@@ -55,6 +55,12 @@ let AuthController = class AuthController {
         }
         return result;
     }
+    async getAllUsers(req) {
+        if (req.user.role !== 'manager' && req.user.role !== 'admin') {
+            throw new common_1.BadRequestException('Недостаточно прав доступа');
+        }
+        return this.authService.getAllUsers();
+    }
     async logout(req) {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (token) {
@@ -230,6 +236,44 @@ __decorate([
     __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "changePassword", null);
+__decorate([
+    (0, common_1.Get)('users'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Получение списка всех пользователей (только для менеджеров и администраторов)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Список пользователей успешно получен',
+        schema: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' },
+                    username: { type: 'string', example: 'testuser123' },
+                    email: { type: 'string', example: 'test@example.com' },
+                    first_name: { type: 'string', example: 'John' },
+                    last_name: { type: 'string', example: 'Doe' },
+                    phone: { type: 'string', example: '+995591234567', nullable: true },
+                    role: { type: 'string', example: 'user' },
+                    created_at: { type: 'string', format: 'date-time' }
+                }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Пользователь не авторизован',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Недостаточно прав доступа',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getAllUsers", null);
 __decorate([
     (0, common_1.Post)('logout'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),

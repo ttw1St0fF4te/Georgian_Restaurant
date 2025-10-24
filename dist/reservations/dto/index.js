@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RestaurantTableAvailabilityDto = exports.OccupiedTimeSlotDto = exports.ReservationResponseDto = exports.UpdateReservationDto = exports.CreateReservationDto = void 0;
+exports.RestaurantTableAvailabilityDto = exports.OccupiedTimeSlotDto = exports.ReservationResponseDto = exports.UpdateReservationDto = exports.CreateReservationForUserDto = exports.CreateReservationDto = void 0;
 var create_reservation_dto_1 = require("./create-reservation.dto");
 Object.defineProperty(exports, "CreateReservationDto", { enumerable: true, get: function () { return create_reservation_dto_1.CreateReservationDto; } });
+var create_reservation_for_user_dto_1 = require("./create-reservation-for-user.dto");
+Object.defineProperty(exports, "CreateReservationForUserDto", { enumerable: true, get: function () { return create_reservation_for_user_dto_1.CreateReservationForUserDto; } });
 var update_reservation_dto_1 = require("./update-reservation.dto");
 Object.defineProperty(exports, "UpdateReservationDto", { enumerable: true, get: function () { return update_reservation_dto_1.UpdateReservationDto; } });
 var reservation_response_dto_1 = require("./reservation-response.dto");

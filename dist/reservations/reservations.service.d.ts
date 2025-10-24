@@ -32,5 +32,7 @@ export declare class ReservationsService {
     getUserActiveReservations(userId: string): Promise<ReservationResponseDto[]>;
     confirmReservation(userId: string, reservationId: string): Promise<ReservationResponseDto>;
     cancelReservation(userId: string, reservationId: string): Promise<ReservationResponseDto>;
+    confirmReservationForManager(reservationId: string): Promise<ReservationResponseDto>;
+    cancelReservationForManager(reservationId: string): Promise<ReservationResponseDto>;
     private mapToResponseDto;
 }

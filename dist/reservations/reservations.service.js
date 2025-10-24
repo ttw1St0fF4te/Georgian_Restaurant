@@ -319,6 +319,39 @@ let ReservationsService = class ReservationsService {
         const updatedReservation = await this.reservationRepository.save(reservation);
         return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
     }
+    async confirmReservationForManager(reservationId) {
+        const reservation = await this.reservationRepository.findOne({
+            where: { reservation_id: reservationId },
+            relations: ['restaurant', 'table'],
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException('Бронирование не найдено');
+        }
+        if (reservation.reservation_status !== table_reservation_entity_1.ReservationStatus.UNCONFIRMED) {
+            throw new common_1.BadRequestException(`Можно подтвердить только неподтвержденные бронирования. Текущий статус: ${reservation.reservation_status}`);
+        }
+        reservation.reservation_status = table_reservation_entity_1.ReservationStatus.CONFIRMED;
+        reservation.confirmed_at = new Date();
+        reservation.updated_at = new Date();
+        const updatedReservation = await this.reservationRepository.save(reservation);
+        return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
+    }
+    async cancelReservationForManager(reservationId) {
+        const reservation = await this.reservationRepository.findOne({
+            where: { reservation_id: reservationId },
+            relations: ['restaurant', 'table'],
+        });
+        if (!reservation) {
+            throw new common_1.NotFoundException('Бронирование не найдено');
+        }
+        if (reservation.reservation_status !== table_reservation_entity_1.ReservationStatus.UNCONFIRMED) {
+            throw new common_1.BadRequestException(`Можно отменить только неподтвержденные бронирования. Текущий статус: ${reservation.reservation_status}`);
+        }
+        reservation.reservation_status = table_reservation_entity_1.ReservationStatus.CANCELLED;
+        reservation.updated_at = new Date();
+        const updatedReservation = await this.reservationRepository.save(reservation);
+        return this.mapToResponseDto(updatedReservation, reservation.restaurant, reservation.table);
+    }
     mapToResponseDto(reservation, restaurant, table) {
         let reservationDateStr;
         if (reservation.reservation_date instanceof Date) {

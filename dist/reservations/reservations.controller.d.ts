@@ -1,5 +1,5 @@
 import { ReservationsService } from './reservations.service';
-import { CreateReservationDto, ReservationResponseDto, RestaurantTableAvailabilityDto } from './dto';
+import { CreateReservationDto, CreateReservationForUserDto, ReservationResponseDto, RestaurantTableAvailabilityDto } from './dto';
 import { Request } from 'express';
 interface AuthenticatedRequest extends Request {
     user: {
@@ -12,6 +12,7 @@ export declare class ReservationsController {
     private readonly reservationsService;
     constructor(reservationsService: ReservationsService);
     createReservation(req: AuthenticatedRequest, createReservationDto: CreateReservationDto): Promise<ReservationResponseDto>;
+    createReservationForUser(createReservationForUserDto: CreateReservationForUserDto): Promise<ReservationResponseDto>;
     getAllReservations(): Promise<ReservationResponseDto[]>;
     getActiveReservations(): Promise<ReservationResponseDto[]>;
     getInactiveReservations(): Promise<ReservationResponseDto[]>;
@@ -20,5 +21,7 @@ export declare class ReservationsController {
     getUserActiveReservations(req: AuthenticatedRequest): Promise<ReservationResponseDto[]>;
     confirmReservation(req: AuthenticatedRequest, reservationId: string): Promise<ReservationResponseDto>;
     cancelReservation(req: AuthenticatedRequest, reservationId: string): Promise<ReservationResponseDto>;
+    confirmReservationForManager(reservationId: string): Promise<ReservationResponseDto>;
+    cancelReservationForManager(reservationId: string): Promise<ReservationResponseDto>;
 }
 export {};

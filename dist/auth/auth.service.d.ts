@@ -22,4 +22,14 @@ export declare class AuthService {
     getUserDatabaseRole(role: string): Promise<string>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<any>;
     changePassword(userId: string, dto: ChangePasswordDto): Promise<any>;
+    getAllUsers(): Promise<{
+        user_id: string;
+        username: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+        phone: string;
+        role: any;
+        created_at: Date;
+    }[]>;
 }

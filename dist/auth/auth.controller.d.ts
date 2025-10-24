@@ -15,6 +15,16 @@ export declare class AuthController {
     getProfile(req: any): Promise<any>;
     updateProfile(req: any, dto: UpdateProfileDto): Promise<any>;
     changePassword(req: any, dto: ChangePasswordDto): Promise<any>;
+    getAllUsers(req: any): Promise<{
+        user_id: string;
+        username: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+        phone: string;
+        role: any;
+        created_at: Date;
+    }[]>;
     logout(req: any): Promise<{
         message: string;
         timestamp: string;

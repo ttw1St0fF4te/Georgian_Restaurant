@@ -251,6 +251,30 @@ let AuthService = class AuthService {
       ) as res`, [userId, newHash]);
         return result[0]?.res || null;
     }
+    async getAllUsers() {
+        const users = await this.userRepository.find({
+            relations: ['role'],
+            select: [
+                'user_id',
+                'username',
+                'email',
+                'first_name',
+                'last_name',
+                'phone',
+                'created_at'
+            ]
+        });
+        return users.map(user => ({
+            user_id: user.user_id,
+            username: user.username,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            phone: user.phone,
+            role: user.role?.role_name || 'user',
+            created_at: user.created_at
+        }));
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

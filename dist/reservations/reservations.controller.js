@@ -29,6 +29,9 @@ let ReservationsController = class ReservationsController {
         const userId = req.user.userId;
         return this.reservationsService.createReservation(userId, createReservationDto);
     }
+    async createReservationForUser(createReservationForUserDto) {
+        return this.reservationsService.createReservation(createReservationForUserDto.user_id, createReservationForUserDto);
+    }
     async getAllReservations() {
         return this.reservationsService.getAllReservations();
     }
@@ -56,6 +59,12 @@ let ReservationsController = class ReservationsController {
     async cancelReservation(req, reservationId) {
         const userId = req.user.userId;
         return this.reservationsService.cancelReservation(userId, reservationId);
+    }
+    async confirmReservationForManager(reservationId) {
+        return this.reservationsService.confirmReservationForManager(reservationId);
+    }
+    async cancelReservationForManager(reservationId) {
+        return this.reservationsService.cancelReservationForManager(reservationId);
     }
 };
 exports.ReservationsController = ReservationsController;
@@ -143,6 +152,31 @@ __decorate([
     __metadata("design:paramtypes", [Object, dto_1.CreateReservationDto]),
     __metadata("design:returntype", Promise)
 ], ReservationsController.prototype, "createReservation", null);
+__decorate([
+    (0, common_1.Post)('for-user'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Создать бронирование для пользователя (только менеджеры и администраторы)',
+        description: `
+    Создает новое бронирование для указанного пользователя. Доступно только менеджерам и администраторам.
+    Проверяет все те же бизнес-правила, что и обычное создание бронирования.
+    `,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.CREATED,
+        description: 'Бронирование успешно создано',
+        type: dto_1.ReservationResponseDto,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Неверные данные или нарушение бизнес-правил',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [dto_1.CreateReservationForUserDto]),
+    __metadata("design:returntype", Promise)
+], ReservationsController.prototype, "createReservationForUser", null);
 __decorate([
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)('admin', 'manager'),
@@ -373,6 +407,76 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ReservationsController.prototype, "cancelReservation", null);
+__decorate([
+    (0, common_1.Patch)('manager/:reservationId/confirm'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Подтвердить бронирование (только для менеджеров)',
+        description: `
+    Подтверждает любое бронирование в системе. Доступно только менеджерам и администраторам.
+    Возможно только для бронирований со статусом 'unconfirmed'.
+    При подтверждении статус меняется на 'confirmed' и устанавливается время подтверждения.
+    `,
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'reservationId',
+        description: 'ID бронирования для подтверждения',
+        example: 'uuid-string',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: 'Бронирование успешно подтверждено',
+        type: dto_1.ReservationResponseDto,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Нельзя подтвердить бронирование с текущим статусом',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Бронирование не найдено',
+    }),
+    __param(0, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ReservationsController.prototype, "confirmReservationForManager", null);
+__decorate([
+    (0, common_1.Patch)('manager/:reservationId/cancel'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Отменить бронирование (только для менеджеров)',
+        description: `
+    Отменяет любое бронирование в системе. Доступно только менеджерам и администраторам.
+    Возможно только для бронирований со статусом 'unconfirmed'.
+    При отмене статус меняется на 'cancelled'.
+    `,
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'reservationId',
+        description: 'ID бронирования для отмены',
+        example: 'uuid-string',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: 'Бронирование успешно отменено',
+        type: dto_1.ReservationResponseDto,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Нельзя отменить бронирование с текущим статусом',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Бронирование не найдено',
+    }),
+    __param(0, (0, common_1.Param)('reservationId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ReservationsController.prototype, "cancelReservationForManager", null);
 exports.ReservationsController = ReservationsController = __decorate([
     (0, swagger_1.ApiTags)('reservations'),
     (0, common_1.Controller)('reservations'),
