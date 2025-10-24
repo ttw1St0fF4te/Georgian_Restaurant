@@ -176,6 +176,50 @@ let MenuService = class MenuService {
         const column = columnMap[sortBy];
         queryBuilder.orderBy(column, sortOrder);
     }
+    async findAllForManager(filterDto) {
+        const { search, category_id, is_vegetarian, is_spicy, min_price, max_price, max_cooking_time, max_calories, sort_by = menu_dto_1.MenuSortField.NAME, sort_order = menu_dto_1.SortOrder.ASC, page = 1, limit = 20, } = filterDto;
+        const queryBuilder = this.menuItemRepository
+            .createQueryBuilder('menu_item')
+            .leftJoinAndSelect('menu_item.category', 'category');
+        if (search) {
+            queryBuilder.andWhere('LOWER(menu_item.item_name) LIKE LOWER(:search)', {
+                search: `%${search}%`,
+            });
+        }
+        if (category_id) {
+            queryBuilder.andWhere('menu_item.category_id = :category_id', { category_id });
+        }
+        if (is_vegetarian !== undefined) {
+            queryBuilder.andWhere('menu_item.is_vegetarian = :is_vegetarian', { is_vegetarian });
+        }
+        if (is_spicy !== undefined) {
+            queryBuilder.andWhere('menu_item.is_spicy = :is_spicy', { is_spicy });
+        }
+        if (min_price !== undefined) {
+            queryBuilder.andWhere('menu_item.price >= :min_price', { min_price });
+        }
+        if (max_price !== undefined) {
+            queryBuilder.andWhere('menu_item.price <= :max_price', { max_price });
+        }
+        if (max_cooking_time !== undefined) {
+            queryBuilder.andWhere('menu_item.cooking_time_minutes <= :max_cooking_time', { max_cooking_time });
+        }
+        if (max_calories !== undefined) {
+            queryBuilder.andWhere('menu_item.calories <= :max_calories', { max_calories });
+        }
+        this.applySorting(queryBuilder, sort_by, sort_order);
+        const offset = (page - 1) * limit;
+        queryBuilder.skip(offset).take(limit);
+        const [items, total] = await queryBuilder.getManyAndCount();
+        const pages = Math.ceil(total / limit);
+        return {
+            items,
+            total,
+            page,
+            limit,
+            pages,
+        };
+    }
 };
 exports.MenuService = MenuService;
 exports.MenuService = MenuService = __decorate([

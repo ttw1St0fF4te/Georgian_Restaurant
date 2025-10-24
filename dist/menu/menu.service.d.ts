@@ -17,4 +17,5 @@ export declare class MenuService {
     private createBaseQuery;
     private applyFilters;
     private applySorting;
+    findAllForManager(filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto>;
 }

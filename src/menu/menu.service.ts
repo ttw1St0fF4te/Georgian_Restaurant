@@ -257,4 +257,89 @@ export class MenuService {
     const column = columnMap[sortBy];
     queryBuilder.orderBy(column, sortOrder);
   }
+
+  async findAllForManager(filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto> {
+    const {
+      search,
+      category_id,
+      is_vegetarian,
+      is_spicy,
+      min_price,
+      max_price,
+      max_cooking_time,
+      max_calories,
+      sort_by = MenuSortField.NAME,
+      sort_order = SortOrder.ASC,
+      page = 1,
+      limit = 20,
+    } = filterDto;
+
+    const queryBuilder: SelectQueryBuilder<MenuItem> = this.menuItemRepository
+      .createQueryBuilder('menu_item')
+      .leftJoinAndSelect('menu_item.category', 'category');
+      // НЕ фильтруем по is_deleted для менеджера - показываем все блюда
+
+    // Поиск по названию
+    if (search) {
+      queryBuilder.andWhere('LOWER(menu_item.item_name) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    // Фильтр по категории
+    if (category_id) {
+      queryBuilder.andWhere('menu_item.category_id = :category_id', { category_id });
+    }
+
+    // Фильтр по вегетарианским блюдам
+    if (is_vegetarian !== undefined) {
+      queryBuilder.andWhere('menu_item.is_vegetarian = :is_vegetarian', { is_vegetarian });
+    }
+
+    // Фильтр по острым блюдам
+    if (is_spicy !== undefined) {
+      queryBuilder.andWhere('menu_item.is_spicy = :is_spicy', { is_spicy });
+    }
+
+    // Фильтр по минимальной цене
+    if (min_price !== undefined) {
+      queryBuilder.andWhere('menu_item.price >= :min_price', { min_price });
+    }
+
+    // Фильтр по максимальной цене
+    if (max_price !== undefined) {
+      queryBuilder.andWhere('menu_item.price <= :max_price', { max_price });
+    }
+
+    // Фильтр по максимальному времени приготовления
+    if (max_cooking_time !== undefined) {
+      queryBuilder.andWhere('menu_item.cooking_time_minutes <= :max_cooking_time', { max_cooking_time });
+    }
+
+    // Фильтр по максимальным калориям
+    if (max_calories !== undefined) {
+      queryBuilder.andWhere('menu_item.calories <= :max_calories', { max_calories });
+    }
+
+    // Применяем сортировку
+    this.applySorting(queryBuilder, sort_by, sort_order);
+
+    // Пагинация
+    const offset = (page - 1) * limit;
+    queryBuilder.skip(offset).take(limit);
+
+    // Выполняем запрос
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    // Вычисляем количество страниц
+    const pages = Math.ceil(total / limit);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      pages,
+    };
+  }
 }

@@ -5,6 +5,7 @@ export declare class MenuController {
     constructor(menuService: MenuService);
     findAll(filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto>;
     findByCategory(categoryId: number, filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto>;
+    findAllForManager(filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto>;
     findOne(id: number): Promise<MenuItemResponseDto>;
     create(createMenuItemDto: CreateMenuItemDto): Promise<MenuItemResponseDto>;
     update(id: number, updateMenuItemDto: UpdateMenuItemDto): Promise<MenuItemResponseDto>;

@@ -1298,6 +1298,169 @@
         ]
       }
     },
+    "/menu/all": {
+      "get": {
+        "description": "Возвращает список всех блюд включая мягко удаленные (is_deleted = true). Доступно только менеджерам и администраторам.",
+        "operationId": "MenuController_findAllForManager",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Поиск по названию блюда",
+            "schema": {
+              "example": "хачапури",
+              "type": "string"
+            }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр по категории",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "is_vegetarian",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только вегетарианских блюд",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_spicy",
+            "required": false,
+            "in": "query",
+            "description": "Фильтр только острых блюд",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "min_price",
+            "required": false,
+            "in": "query",
+            "description": "Минимальная цена",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_price",
+            "required": false,
+            "in": "query",
+            "description": "Максимальная цена",
+            "schema": {
+              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_cooking_time",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное время приготовления",
+            "schema": {
+              "example": 30,
+              "type": "number"
+            }
+          },
+          {
+            "name": "max_calories",
+            "required": false,
+            "in": "query",
+            "description": "Максимальное количество калорий",
+            "schema": {
+              "example": 500,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort_by",
+            "required": false,
+            "in": "query",
+            "description": "Поле для сортировки",
+            "schema": {
+              "example": "price",
+              "type": "string",
+              "enum": [
+                "price",
+                "cooking_time_minutes",
+                "calories",
+                "item_name",
+                "created_at"
+              ]
+            }
+          },
+          {
+            "name": "sort_order",
+            "required": false,
+            "in": "query",
+            "description": "Порядок сортировки",
+            "schema": {
+              "example": "ASC",
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Номер страницы (для пагинации)",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Количество элементов на странице",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список всех блюд успешно получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuPaginationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить все блюда включая удаленные",
+        "tags": [
+          "Menu"
+        ]
+      }
+    },
     "/menu/{id}": {
       "get": {
         "description": "Возвращает детальную информацию о блюде с информацией о категории",

@@ -29,6 +29,9 @@ let MenuController = class MenuController {
     async findByCategory(categoryId, filterDto) {
         return this.menuService.findByCategory(categoryId, filterDto);
     }
+    async findAllForManager(filterDto) {
+        return this.menuService.findAllForManager(filterDto);
+    }
     async findOne(id) {
         return this.menuService.findOne(id);
     }
@@ -98,6 +101,24 @@ __decorate([
     __metadata("design:paramtypes", [Number, menu_dto_1.MenuFilterDto]),
     __metadata("design:returntype", Promise)
 ], MenuController.prototype, "findByCategory", null);
+__decorate([
+    (0, common_1.Get)('all'),
+    (0, roles_decorator_1.Roles)('manager', 'admin'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Получить все блюда включая удаленные',
+        description: 'Возвращает список всех блюд включая мягко удаленные (is_deleted = true). Доступно только менеджерам и администраторам.',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Список всех блюд успешно получен',
+        type: menu_dto_1.MenuPaginationResponseDto,
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [menu_dto_1.MenuFilterDto]),
+    __metadata("design:returntype", Promise)
+], MenuController.prototype, "findAllForManager", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, public_decorator_1.Public)(),

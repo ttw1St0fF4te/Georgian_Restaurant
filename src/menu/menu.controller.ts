@@ -81,6 +81,22 @@ export class MenuController {
     return this.menuService.findByCategory(categoryId, filterDto);
   }
 
+  @Get('all')
+  @Roles('manager', 'admin') // Только менеджеры и администраторы
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Получить все блюда включая удаленные',
+    description: 'Возвращает список всех блюд включая мягко удаленные (is_deleted = true). Доступно только менеджерам и администраторам.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Список всех блюд успешно получен',
+    type: MenuPaginationResponseDto,
+  })
+  async findAllForManager(@Query() filterDto: MenuFilterDto): Promise<MenuPaginationResponseDto> {
+    return this.menuService.findAllForManager(filterDto);
+  }
+
   @Get(':id')
   @Public() // Доступно всем
   @ApiOperation({
@@ -224,4 +240,5 @@ export class MenuController {
   async restore(@Param('id', ParseIntPipe) id: number): Promise<MenuItemResponseDto> {
     return this.menuService.restore(id);
   }
+
 }
