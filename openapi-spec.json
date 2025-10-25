@@ -813,6 +813,228 @@
         ]
       }
     },
+    "/auth/admin/users": {
+      "post": {
+        "operationId": "AuthController_createUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Пользователь успешно создан"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "user_id": {
+                          "type": "string",
+                          "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                        },
+                        "username": {
+                          "type": "string",
+                          "example": "new_user"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "user@example.com"
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "example": "Имя"
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "example": "Фамилия"
+                        },
+                        "role": {
+                          "type": "string",
+                          "example": "user"
+                        },
+                        "role_id": {
+                          "type": "number",
+                          "example": 3
+                        }
+                      }
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2025-10-19T20:15:30.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Недостаточно прав доступа"
+          },
+          "409": {
+            "description": "Пользователь с таким именем или email уже существует"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Создание нового пользователя (только для администраторов)",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/auth/admin/users/{id}": {
+      "put": {
+        "operationId": "AuthController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Пользователь успешно обновлён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Пользователь успешно обновлён"
+                    },
+                    "updated_user_id": {
+                      "type": "string",
+                      "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные или пользователь не найден"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Недостаточно прав доступа"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Обновление пользователя (только для администраторов)",
+        "tags": [
+          "Authentication"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь успешно удалён",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Пользователь успешно удалён"
+                    },
+                    "deleted_user_id": {
+                      "type": "string",
+                      "example": "d5669069-0e13-4c97-a07d-381c12f37142"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Пользователь не найден или не может быть удалён"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Недостаточно прав доступа"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Удаление пользователя (только для администраторов)",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/menu-categories": {
       "get": {
         "description": "Возвращает список всех категорий меню, отсортированных по названию",
@@ -4429,6 +4651,94 @@
       "ChangePasswordDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "newuser123"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email адрес",
+            "example": "newuser@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Пароль",
+            "example": "StrongPass123!"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "Имя",
+            "example": "Иван"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Фамилия",
+            "example": "Иванов"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Номер телефона",
+            "example": "+995591234567"
+          },
+          "role_id": {
+            "type": "number",
+            "description": "ID роли пользователя",
+            "example": 3
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password",
+          "first_name",
+          "last_name",
+          "role_id"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Имя пользователя",
+            "example": "updateduser123"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email адрес",
+            "example": "updated@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Новый пароль (если нужно изменить)",
+            "example": "NewStrongPass123!"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "Имя",
+            "example": "Петр"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Фамилия",
+            "example": "Петров"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Номер телефона",
+            "example": "+995591234567"
+          },
+          "role_id": {
+            "type": "number",
+            "description": "ID роли пользователя",
+            "example": 2
+          }
+        }
       },
       "MenuCategoryResponseDto": {
         "type": "object",

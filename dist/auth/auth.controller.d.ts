@@ -1,6 +1,8 @@
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { UpdateProfileDto } from '../users/dto/update-profile.dto';
@@ -23,10 +25,15 @@ export declare class AuthController {
         last_name: string;
         phone: string;
         role: any;
+        role_id: number;
         created_at: Date;
+        last_login: Date;
     }[]>;
     logout(req: any): Promise<{
         message: string;
         timestamp: string;
     }>;
+    createUser(req: any, createUserDto: CreateUserDto): Promise<any>;
+    updateUser(req: any, userId: string, updateUserDto: UpdateUserDto): Promise<any>;
+    deleteUser(req: any, userId: string): Promise<any>;
 }

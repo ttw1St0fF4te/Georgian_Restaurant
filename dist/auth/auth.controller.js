@@ -19,6 +19,8 @@ const swagger_1 = require("@nestjs/swagger");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
+const create_user_dto_1 = require("./dto/create-user.dto");
+const update_user_dto_1 = require("./dto/update-user.dto");
 const auth_response_dto_1 = require("./dto/auth-response.dto");
 const update_profile_dto_1 = require("../users/dto/update-profile.dto");
 const change_password_dto_1 = require("../users/dto/change-password.dto");
@@ -70,6 +72,31 @@ let AuthController = class AuthController {
             message: 'Logout successful',
             timestamp: new Date().toISOString(),
         };
+    }
+    async createUser(req, createUserDto) {
+        if (req.user.role !== 'admin') {
+            throw new common_1.BadRequestException('Недостаточно прав доступа');
+        }
+        return this.authService.createUser(createUserDto);
+    }
+    async updateUser(req, userId, updateUserDto) {
+        if (req.user.role !== 'admin') {
+            throw new common_1.BadRequestException('Недостаточно прав доступа');
+        }
+        const hasData = Object.keys(updateUserDto).some(key => updateUserDto[key] !== undefined && updateUserDto[key] !== null);
+        if (!hasData) {
+            throw new common_1.BadRequestException('Необходимо указать хотя бы одно поле для обновления');
+        }
+        return this.authService.updateUser(userId, updateUserDto);
+    }
+    async deleteUser(req, userId) {
+        if (req.user.role !== 'admin') {
+            throw new common_1.BadRequestException('Недостаточно прав доступа');
+        }
+        if (req.user.userId === userId) {
+            throw new common_1.BadRequestException('Нельзя удалить собственный аккаунт');
+        }
+        return this.authService.deleteUser(userId);
     }
 };
 exports.AuthController = AuthController;
@@ -293,6 +320,130 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.Post)('admin/users'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Создание нового пользователя (только для администраторов)' }),
+    (0, swagger_1.ApiBody)({ type: create_user_dto_1.CreateUserDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Пользователь успешно создан',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'success' },
+                message: { type: 'string', example: 'Пользователь успешно создан' },
+                user: {
+                    type: 'object',
+                    properties: {
+                        user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' },
+                        username: { type: 'string', example: 'new_user' },
+                        email: { type: 'string', example: 'user@example.com' },
+                        first_name: { type: 'string', example: 'Имя' },
+                        last_name: { type: 'string', example: 'Фамилия' },
+                        role: { type: 'string', example: 'user' },
+                        role_id: { type: 'number', example: 3 }
+                    }
+                },
+                created_at: { type: 'string', example: '2025-10-19T20:15:30.000Z' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Неверные данные',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Пользователь не авторизован',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Недостаточно прав доступа',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 409,
+        description: 'Пользователь с таким именем или email уже существует',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, create_user_dto_1.CreateUserDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "createUser", null);
+__decorate([
+    (0, common_1.Put)('admin/users/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Обновление пользователя (только для администраторов)' }),
+    (0, swagger_1.ApiBody)({ type: update_user_dto_1.UpdateUserDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Пользователь успешно обновлён',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'success' },
+                message: { type: 'string', example: 'Пользователь успешно обновлён' },
+                updated_user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Неверные данные или пользователь не найден',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Пользователь не авторизован',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Недостаточно прав доступа',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.Delete)('admin/users/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Удаление пользователя (только для администраторов)' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Пользователь успешно удалён',
+        schema: {
+            type: 'object',
+            properties: {
+                status: { type: 'string', example: 'success' },
+                message: { type: 'string', example: 'Пользователь успешно удалён' },
+                deleted_user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Пользователь не найден или не может быть удалён',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Пользователь не авторизован',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Недостаточно прав доступа',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deleteUser", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),

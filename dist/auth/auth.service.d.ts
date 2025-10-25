@@ -5,6 +5,8 @@ import { UserRole } from '../entities/user-role.entity';
 import { UserAddress } from '../entities/user-address.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { UpdateProfileDto } from '../users/dto/update-profile.dto';
@@ -30,6 +32,11 @@ export declare class AuthService {
         last_name: string;
         phone: string;
         role: any;
+        role_id: number;
         created_at: Date;
+        last_login: Date;
     }[]>;
+    createUser(createUserDto: CreateUserDto): Promise<any>;
+    updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<any>;
+    deleteUser(userId: string): Promise<any>;
 }

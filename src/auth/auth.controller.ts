@@ -3,12 +3,15 @@ import {
   Post,
   Get,
   Put,
+  Delete,
   Body,
+  Param,
   UseGuards,
   Request,
   HttpCode,
   HttpStatus,
   BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -22,6 +25,8 @@ import {
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { UpdateProfileDto } from '../users/dto/update-profile.dto';
@@ -273,5 +278,152 @@ export class AuthController {
       message: 'Logout successful',
       timestamp: new Date().toISOString(),
     };
+  }
+
+  // Admin endpoints for user management
+  @Post('admin/users')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Создание нового пользователя (только для администраторов)' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Пользователь успешно создан',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'success' },
+        message: { type: 'string', example: 'Пользователь успешно создан' },
+        user: {
+          type: 'object',
+          properties: {
+            user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' },
+            username: { type: 'string', example: 'new_user' },
+            email: { type: 'string', example: 'user@example.com' },
+            first_name: { type: 'string', example: 'Имя' },
+            last_name: { type: 'string', example: 'Фамилия' },
+            role: { type: 'string', example: 'user' },
+            role_id: { type: 'number', example: 3 }
+          }
+        },
+        created_at: { type: 'string', example: '2025-10-19T20:15:30.000Z' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Неверные данные',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Пользователь не авторизован',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Пользователь с таким именем или email уже существует',
+  })
+  async createUser(@Request() req, @Body() createUserDto: CreateUserDto) {
+    // Проверяем права администратора
+    if (req.user.role !== 'admin') {
+      throw new BadRequestException('Недостаточно прав доступа');
+    }
+    
+    return this.authService.createUser(createUserDto);
+  }
+
+  @Put('admin/users/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Обновление пользователя (только для администраторов)' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Пользователь успешно обновлён',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'success' },
+        message: { type: 'string', example: 'Пользователь успешно обновлён' },
+        updated_user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Неверные данные или пользователь не найден',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Пользователь не авторизован',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
+  async updateUser(
+    @Request() req,
+    @Param('id') userId: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    // Проверяем права администратора
+    if (req.user.role !== 'admin') {
+      throw new BadRequestException('Недостаточно прав доступа');
+    }
+
+    // Проверяем, что передан хотя бы один параметр
+    const hasData = Object.keys(updateUserDto).some(key => 
+      updateUserDto[key] !== undefined && updateUserDto[key] !== null
+    );
+    if (!hasData) {
+      throw new BadRequestException('Необходимо указать хотя бы одно поле для обновления');
+    }
+    
+    return this.authService.updateUser(userId, updateUserDto);
+  }
+
+  @Delete('admin/users/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Удаление пользователя (только для администраторов)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Пользователь успешно удалён',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'success' },
+        message: { type: 'string', example: 'Пользователь успешно удалён' },
+        deleted_user_id: { type: 'string', example: 'd5669069-0e13-4c97-a07d-381c12f37142' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Пользователь не найден или не может быть удалён',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Пользователь не авторизован',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Недостаточно прав доступа',
+  })
+  async deleteUser(@Request() req, @Param('id') userId: string) {
+    // Проверяем права администратора
+    if (req.user.role !== 'admin') {
+      throw new BadRequestException('Недостаточно прав доступа');
+    }
+
+    // Проверяем, что пользователь не пытается удалить самого себя
+    if (req.user.userId === userId) {
+      throw new BadRequestException('Нельзя удалить собственный аккаунт');
+    }
+    
+    return this.authService.deleteUser(userId);
   }
 }

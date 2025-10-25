@@ -261,7 +261,9 @@ let AuthService = class AuthService {
                 'first_name',
                 'last_name',
                 'phone',
-                'created_at'
+                'role_id',
+                'created_at',
+                'last_login'
             ]
         });
         return users.map(user => ({
@@ -272,8 +274,157 @@ let AuthService = class AuthService {
             last_name: user.last_name,
             phone: user.phone,
             role: user.role?.role_name || 'user',
-            created_at: user.created_at
+            role_id: user.role_id,
+            created_at: user.created_at,
+            last_login: user.last_login
         }));
+    }
+    async createUser(createUserDto) {
+        const { username, email, password, first_name, last_name, phone, role_id } = createUserDto;
+        const existingUserByUsername = await this.userRepository.findOne({
+            where: { username },
+        });
+        if (existingUserByUsername) {
+            throw new common_1.ConflictException('Username уже занят');
+        }
+        const existingUserByEmail = await this.userRepository.findOne({
+            where: { email },
+        });
+        if (existingUserByEmail) {
+            throw new common_1.ConflictException('Email уже зарегистрирован');
+        }
+        const userRole = await this.userRoleRepository.findOne({
+            where: { role_id },
+        });
+        if (!userRole) {
+            throw new common_1.BadRequestException('Указанная роль не найдена');
+        }
+        const saltRounds = 12;
+        const password_hash = await bcrypt.hash(password, saltRounds);
+        const newUser = this.userRepository.create({
+            username,
+            email,
+            password_hash,
+            first_name,
+            last_name,
+            phone: phone || null,
+            role_id,
+        });
+        try {
+            const savedUser = await this.userRepository.save(newUser);
+            return {
+                status: 'success',
+                message: 'Пользователь успешно создан',
+                user: {
+                    user_id: savedUser.user_id,
+                    username: savedUser.username,
+                    email: savedUser.email,
+                    first_name: savedUser.first_name,
+                    last_name: savedUser.last_name,
+                    role: userRole.role_name,
+                    role_id: savedUser.role_id,
+                },
+                created_at: savedUser.created_at.toISOString(),
+            };
+        }
+        catch (error) {
+            if (error.code === '23505') {
+                if (error.detail.includes('username')) {
+                    throw new common_1.ConflictException('Username уже занят');
+                }
+                if (error.detail.includes('email')) {
+                    throw new common_1.ConflictException('Email уже зарегистрирован');
+                }
+            }
+            throw new common_1.BadRequestException('Ошибка при создании пользователя');
+        }
+    }
+    async updateUser(userId, updateUserDto) {
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+        });
+        if (!user) {
+            throw new common_1.BadRequestException('Пользователь не найден');
+        }
+        if (updateUserDto.username && updateUserDto.username !== user.username) {
+            const existingUser = await this.userRepository.findOne({
+                where: { username: updateUserDto.username },
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('Username уже занят');
+            }
+        }
+        if (updateUserDto.email && updateUserDto.email !== user.email) {
+            const existingUser = await this.userRepository.findOne({
+                where: { email: updateUserDto.email },
+            });
+            if (existingUser) {
+                throw new common_1.ConflictException('Email уже зарегистрирован');
+            }
+        }
+        if (updateUserDto.role_id && updateUserDto.role_id !== user.role_id) {
+            const userRole = await this.userRoleRepository.findOne({
+                where: { role_id: updateUserDto.role_id },
+            });
+            if (!userRole) {
+                throw new common_1.BadRequestException('Указанная роль не найдена');
+            }
+        }
+        const updateData = {};
+        if (updateUserDto.username)
+            updateData.username = updateUserDto.username;
+        if (updateUserDto.email)
+            updateData.email = updateUserDto.email;
+        if (updateUserDto.first_name)
+            updateData.first_name = updateUserDto.first_name;
+        if (updateUserDto.last_name)
+            updateData.last_name = updateUserDto.last_name;
+        if (updateUserDto.phone !== undefined)
+            updateData.phone = updateUserDto.phone || null;
+        if (updateUserDto.role_id)
+            updateData.role_id = updateUserDto.role_id;
+        if (updateUserDto.password) {
+            const saltRounds = 12;
+            updateData.password_hash = await bcrypt.hash(updateUserDto.password, saltRounds);
+        }
+        try {
+            await this.userRepository.update(userId, updateData);
+            return {
+                status: 'success',
+                message: 'Пользователь успешно обновлён',
+                updated_user_id: userId,
+            };
+        }
+        catch (error) {
+            if (error.code === '23505') {
+                if (error.detail.includes('username')) {
+                    throw new common_1.ConflictException('Username уже занят');
+                }
+                if (error.detail.includes('email')) {
+                    throw new common_1.ConflictException('Email уже зарегистрирован');
+                }
+            }
+            throw new common_1.BadRequestException('Ошибка при обновлении пользователя');
+        }
+    }
+    async deleteUser(userId) {
+        const user = await this.userRepository.findOne({
+            where: { user_id: userId },
+        });
+        if (!user) {
+            throw new common_1.BadRequestException('Пользователь не найден');
+        }
+        try {
+            await this.userRepository.delete(userId);
+            return {
+                status: 'success',
+                message: 'Пользователь успешно удалён',
+                deleted_user_id: userId,
+            };
+        }
+        catch (error) {
+            throw new common_1.BadRequestException('Ошибка при удалении пользователя');
+        }
     }
 };
 exports.AuthService = AuthService;

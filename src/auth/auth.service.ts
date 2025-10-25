@@ -9,6 +9,8 @@ import { UserRole } from '../entities/user-role.entity';
 import { UserAddress } from '../entities/user-address.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthResponseDto, JwtPayload } from './dto/auth-response.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { UpdateProfileDto } from '../users/dto/update-profile.dto';
@@ -333,7 +335,9 @@ export class AuthService {
         'first_name',
         'last_name',
         'phone',
-        'created_at'
+        'role_id',
+        'created_at',
+        'last_login'
       ]
     });
 
@@ -345,7 +349,188 @@ export class AuthService {
       last_name: user.last_name,
       phone: user.phone,
       role: user.role?.role_name || 'user',
-      created_at: user.created_at
+      role_id: user.role_id,
+      created_at: user.created_at,
+      last_login: user.last_login
     }));
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<any> {
+    const { username, email, password, first_name, last_name, phone, role_id } = createUserDto;
+
+    // Проверяем уникальность username
+    const existingUserByUsername = await this.userRepository.findOne({
+      where: { username },
+    });
+
+    if (existingUserByUsername) {
+      throw new ConflictException('Username уже занят');
+    }
+
+    // Проверяем уникальность email
+    const existingUserByEmail = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (existingUserByEmail) {
+      throw new ConflictException('Email уже зарегистрирован');
+    }
+
+    // Проверяем существование роли
+    const userRole = await this.userRoleRepository.findOne({
+      where: { role_id },
+    });
+
+    if (!userRole) {
+      throw new BadRequestException('Указанная роль не найдена');
+    }
+
+    // Хешируем пароль
+    const saltRounds = 12;
+    const password_hash = await bcrypt.hash(password, saltRounds);
+
+    // Создаём нового пользователя
+    const newUser = this.userRepository.create({
+      username,
+      email,
+      password_hash,
+      first_name,
+      last_name,
+      phone: phone || null,
+      role_id,
+    });
+
+    try {
+      const savedUser = await this.userRepository.save(newUser);
+
+      return {
+        status: 'success',
+        message: 'Пользователь успешно создан',
+        user: {
+          user_id: savedUser.user_id,
+          username: savedUser.username,
+          email: savedUser.email,
+          first_name: savedUser.first_name,
+          last_name: savedUser.last_name,
+          role: userRole.role_name,
+          role_id: savedUser.role_id,
+        },
+        created_at: savedUser.created_at.toISOString(),
+      };
+    } catch (error) {
+      // Обработка ошибок базы данных
+      if (error.code === '23505') {
+        // PostgreSQL unique violation
+        if (error.detail.includes('username')) {
+          throw new ConflictException('Username уже занят');
+        }
+        if (error.detail.includes('email')) {
+          throw new ConflictException('Email уже зарегистрирован');
+        }
+      }
+      throw new BadRequestException('Ошибка при создании пользователя');
+    }
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<any> {
+    // Проверяем существование пользователя
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Пользователь не найден');
+    }
+
+    // Проверяем уникальность username (если обновляется)
+    if (updateUserDto.username && updateUserDto.username !== user.username) {
+      const existingUser = await this.userRepository.findOne({
+        where: { username: updateUserDto.username },
+      });
+      if (existingUser) {
+        throw new ConflictException('Username уже занят');
+      }
+    }
+
+    // Проверяем уникальность email (если обновляется)
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+      if (existingUser) {
+        throw new ConflictException('Email уже зарегистрирован');
+      }
+    }
+
+    // Проверяем существование роли (если обновляется)
+    if (updateUserDto.role_id && updateUserDto.role_id !== user.role_id) {
+      const userRole = await this.userRoleRepository.findOne({
+        where: { role_id: updateUserDto.role_id },
+      });
+      if (!userRole) {
+        throw new BadRequestException('Указанная роль не найдена');
+      }
+    }
+
+    // Подготавливаем объект обновления
+    const updateData: any = {};
+    
+    if (updateUserDto.username) updateData.username = updateUserDto.username;
+    if (updateUserDto.email) updateData.email = updateUserDto.email;
+    if (updateUserDto.first_name) updateData.first_name = updateUserDto.first_name;
+    if (updateUserDto.last_name) updateData.last_name = updateUserDto.last_name;
+    if (updateUserDto.phone !== undefined) updateData.phone = updateUserDto.phone || null;
+    if (updateUserDto.role_id) updateData.role_id = updateUserDto.role_id;
+    
+    // Хешируем новый пароль если он предоставлен
+    if (updateUserDto.password) {
+      const saltRounds = 12;
+      updateData.password_hash = await bcrypt.hash(updateUserDto.password, saltRounds);
+    }
+
+    try {
+      await this.userRepository.update(userId, updateData);
+
+      return {
+        status: 'success',
+        message: 'Пользователь успешно обновлён',
+        updated_user_id: userId,
+      };
+    } catch (error) {
+      // Обработка ошибок базы данных
+      if (error.code === '23505') {
+        // PostgreSQL unique violation
+        if (error.detail.includes('username')) {
+          throw new ConflictException('Username уже занят');
+        }
+        if (error.detail.includes('email')) {
+          throw new ConflictException('Email уже зарегистрирован');
+        }
+      }
+      throw new BadRequestException('Ошибка при обновлении пользователя');
+    }
+  }
+
+  async deleteUser(userId: string): Promise<any> {
+    // Проверяем существование пользователя
+    const user = await this.userRepository.findOne({
+      where: { user_id: userId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Пользователь не найден');
+    }
+
+    try {
+      await this.userRepository.delete(userId);
+
+      return {
+        status: 'success',
+        message: 'Пользователь успешно удалён',
+        deleted_user_id: userId,
+      };
+    } catch (error) {
+      throw new BadRequestException('Ошибка при удалении пользователя');
+    }
   }
 }
