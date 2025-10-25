@@ -42,6 +42,107 @@
         ]
       }
     },
+    "/database/dump": {
+      "post": {
+        "description": "Создает полный дамп базы данных с помощью pg_dump и сохраняет его на рабочий стол сервера",
+        "operationId": "DatabaseController_createDatabaseDump",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Дамп базы данных создан успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Database dump created successfully"
+                    },
+                    "filePath": {
+                      "type": "string",
+                      "example": "/Users/username/Desktop/db_dump_2025-10-25T12-00-00-000Z.sql"
+                    },
+                    "fileName": {
+                      "type": "string",
+                      "example": "db_dump_2025-10-25T12-00-00-000Z.sql"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ошибка создания дампа"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Недостаточно прав доступа"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Создать полный дамп базы данных",
+        "tags": [
+          "database"
+        ]
+      }
+    },
+    "/database/info": {
+      "get": {
+        "description": "Возвращает основную информацию о подключении к базе данных",
+        "operationId": "DatabaseController_getDatabaseInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Информация о базе данных получена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "host": {
+                      "type": "string",
+                      "example": "localhost"
+                    },
+                    "port": {
+                      "type": "string",
+                      "example": "5432"
+                    },
+                    "database": {
+                      "type": "string",
+                      "example": "restaurant_db"
+                    },
+                    "user": {
+                      "type": "string",
+                      "example": "postgres"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Получить информацию о базе данных",
+        "tags": [
+          "database"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "description": "Возвращает статус работоспособности Georgian Restaurant API",

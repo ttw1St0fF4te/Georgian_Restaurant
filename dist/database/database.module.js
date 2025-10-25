@@ -9,7 +9,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
+const config_1 = require("@nestjs/config");
 const database_config_1 = require("../config/database.config");
+const database_dump_service_1 = require("./database-dump.service");
+const database_controller_1 = require("./database.controller");
 let DatabaseModule = class DatabaseModule {
 };
 exports.DatabaseModule = DatabaseModule;
@@ -19,8 +22,11 @@ exports.DatabaseModule = DatabaseModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 useClass: database_config_1.DatabaseConfig,
             }),
+            config_1.ConfigModule,
         ],
-        exports: [typeorm_1.TypeOrmModule],
+        controllers: [database_controller_1.DatabaseController],
+        providers: [database_dump_service_1.DatabaseDumpService],
+        exports: [typeorm_1.TypeOrmModule, database_dump_service_1.DatabaseDumpService],
     })
 ], DatabaseModule);
 //# sourceMappingURL=database.module.js.map
